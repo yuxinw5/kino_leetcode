@@ -557,7 +557,7 @@ def findSubstring(self, s: str, words: List[str]) -> List[int]:
 
 @22.5.2
 
-### Solution: 传统sliding window解法
+#### Solution: 传统sliding window解法
 
 一旦发现重复的，window是缩减到上一次出现这个字符的index下一位
 
@@ -579,7 +579,7 @@ def lengthOfLongestSubstring(self, s: str) -> int:
     return max_len
 ```
 
-### Solution: sliding window + map
+#### Solution: sliding window + map
 
 不需要另一个loop来缩进window，用map记录下字符出现的index
 
@@ -639,31 +639,112 @@ def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
 For each character group size eg 1 2 3 .. no of unique chars, we try to make group with t chars and freq of each char >=k within that group.
 
 ```python
-def longestSubstring(str: str, k: int):
-    total_uniques = len(Counter(str))
+def longestSubstring(self,string, k):
+    total_uniques = len(Counter(string))
     ans = 0 
 
     for no_uniques in range(1, total_uniques+1):
         s = 0
         e = 0
         curr_sub = Counter()
-        while e < len(str):
-            curr_sub[str[e]] += 1 # first add the element at right index to the sub
-            
+        while e < len(string):
+            curr_sub[string[e]] += 1 # first add the element at right index to the sub
+
             while len(curr_sub) > no_uniques: # if the number of unique characters in current sub exceedes no_uniques
-                curr_sub[str[s]] -= 1 # removes elements from the left side
-                if curr_sub[str[s]] == 0:
-                    del curr_sub[str[s]] 
+                curr_sub[string[s]] -= 1 # removes elements from the left side
+                if curr_sub[string[s]] == 0:
+                    del curr_sub[string[s]] 
                 s += 1   
-                
+
             for key in curr_sub:
-                if curr_sub[key] < k:
+                if curr_sub[key] >= k:
+                    flag = 1
+                else:
+                    flag = 0
                     break
-            else:
+            if flag == 1:
                 ans = max(ans, e - s + 1)
             e += 1
     return ans
 ```
 
 #### Solution: Divide and Conquer
+
+### 159. Longest Substring with At Most Two Distinct Characters
+
+@22.5.4
+
+340的降级版本: Given a string s , find the length of the longest substring t  that contains at most 2 distinct characters.
+
+Example 1:
+
+Input: "eceba"
+
+Output: 3
+
+Explanation: tis "ece" which its length is 3.
+
+## Palindrome
+
+### 5. Longest Palindromic Substring
+
+@22.5.4
+
+#### Solution: DP O(N^2)
+
+首先定义 P（i，j): P(i,j)= True s[i,j] 是回文串, P(i,j)= False s[i,j] 不是回文串 
+
+接下来
+
+P(i,j)=(P(i+1,j−1)&&S[i]==S[j])
+
+```python
+def longestPalindrome(self, s: str) -> str:
+    n = len(s)
+    dp = [[False] * n for _ in range(n)]
+
+    res = ""
+    for i in range(n):
+        dp[i][i] = True
+        res = s[i]
+
+    for i in range(n-1,-1,-1):
+        for j in range(i+1, n):
+            if s[i] == s[j]:
+                if j-i == 1 or dp[i+1][j-1]:
+                    dp[i][j] = True
+                    if j-i+1 > len(res):
+                        res = s[i:j+1]
+    return res
+```
+
+#### Solution: 中心拓展 O(N^2)
+
+我们知道回文串一定是对称的，所以我们可以每次循环选择一个中心，进行左右扩展，判断左右字符是否相等即可。
+
+```python
+def longestPalindrome(self, s):
+    res = ""
+    for i in xrange(len(s)):
+        # odd case, like "aba"
+        tmp = self.helper(s, i, i)
+        if len(tmp) > len(res):
+            res = tmp
+        # even case, like "abba"
+        tmp = self.helper(s, i, i+1)
+        if len(tmp) > len(res):
+            res = tmp
+    return res
+ 
+# get the longest palindrome, l, r are the middle indexes   
+# from inner to outer
+def helper(self, s, l, r):
+    while l >= 0 and r < len(s) and s[l] == s[r]:
+        l -= 1; r += 1
+    return s[l+1:r]
+```
+
+### 336. Palindrome Pairs
+
+@22.5.4
 
