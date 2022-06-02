@@ -94,3 +94,141 @@ def productExceptSelf(self, nums: List[int]) -> List[int]:
 
 ### 53. Maximum Subarray
 
+#### Solution: DP
+
+At each index, keep track of the maximum sum using DP table , till that point:
+
+1. Save the maximum between [cur_value, max_so_far+cur_value]
+2. Finally, return the maximum out of the table
+
+```python
+def maxSubArray(self, nums):
+		dp = [0] * len(nums)
+    for i,num in enumerate(nums):            
+        dp[i] = max(dp[i-1] + num, num)
+    return max(dp)
+```
+
+#### Solution: Kadane's Algorithm V1
+
+If the sum of a subarray is positive, it has possible to make the next value bigger, so we keep do it until it turn to negative.
+
+If the sum is negative, it has no use to the next element, so we break.
+
+```python
+def maxSubArray(self, nums):
+    cur_max, max_till_now = 0, -inf
+    for c in nums:
+        cur_max = max(c, cur_max + c)
+        max_till_now = max(max_till_now, cur_max)
+    return max_till_now
+```
+
+#### Solution: Kadane's Algorithm V2
+
+```python
+def maxSubArray(self, nums: List[int]) -> int:
+    for i in range(1, len(nums)):
+        if nums[i-1] > 0:
+            nums[i] += nums[i-1]
+    return max(nums)
+```
+
+### 152. Maximum Product Subarray
+
+#### Solution: DP
+
+The trick is
+
+1. Unlike maximum sum, for max product the current negetive minimum value could be max in future when multiplied by another -ve value --> so we need to keep track of minimum_value too
+2. We need to keep track of maximum value --> obviously
+3. We need to keep track of over_all maximum value
+
+We again use dpMax and dpMin arrays where dpMax[i] denotes maximum subarray product ending at i and dpMin[i] denotes minimum subarray product ending at i.
+
+```python
+def maxProduct(self, nums: List[int]) -> int:
+    dpmin = [0] * len(nums)
+    dpmax = [0] * len(nums)
+    dpmin[0] = dpmax[0] = nums[0]
+
+    for i in range(1, len(nums)):
+        num = nums[i]
+        if num >= 0:
+            dpmin[i] = min(dpmin[i-1] * num, num)
+            dpmax[i] = max(dpmax[i-1] * num, num)
+        else:
+            dpmin[i] = min(dpmax[i-1] * num, num)
+            dpmax[i] = max(dpmin[i-1] * num, num)
+
+    return max(dpmax)
+```
+
+#### Solution: DP optimized
+
+```python
+def maxProduct(self, nums):
+    max_prod, min_prod, ans = nums[0], nums[0], nums[0]
+    for i in range(1, len(nums)):
+        x = max(nums[i], max_prod*nums[i], min_prod*nums[i])
+        y = min(nums[i], max_prod*nums[i], min_prod*nums[i])            
+        max_prod, min_prod = x, y
+        ans = max(max_prod, ans)
+    return ans
+```
+
+One important thing to note here is that we've to use old max_prod and old min_prod in every iteration to compute their updated values and not updated max_prod or updated min_prod. Therefore, we need the x and y variables.
+
+### 153. Find Minimum in Rotated Sorted Array
+
+#### Solution: Binary Search
+
+1. loop is left < right, which means inside the loop, left always < right
+2. since we use round up for mid, and left < right from (1), right would never be the same as mid
+3. Therefore, we compare mid with right, since they will never be the same from (2)
+4. if nums[mid] < nums[right], we will know the minimum should be in the left part, so we are moving right.
+5. if nums[mid] > nums[right], minimum should be in the right part, so we are moving left. Since nums[mid] > nums[right],mid can't be the minimum, we can safely move left to mid + 1, which also assure the interval is shrinking
+
+```python
+def findMin(self, nums: List[int]) -> int:
+    l = 0
+    r = len(nums)-1
+    while l < r:
+        mid = (l+r)//2
+        if nums[mid] > nums[r]:
+            l = mid+1
+        else:
+            r = mid
+    return nums[l]
+```
+
+### 33. Search in Rotated Sorted Array
+
+#### Solution: Binary Search
+
+If nums[low] <= nums[mid], the left side is strictly increasing. Otherwise, the right side is strictly increasing. Then we determine whether the target is in the ascending order sise.
+
+```python
+def search(self, nums: List[int], target: int) -> int:
+    if not nums:
+        return -1
+
+    low, high = 0, len(nums) - 1
+
+    while low <= high:
+        mid = (low + high) // 2
+        if target == nums[mid]:
+            return mid
+
+        if nums[low] <= nums[mid]:
+            if nums[low] <= target <= nums[mid]:
+                high = mid - 1
+            else:
+                low = mid + 1
+        else:
+            if nums[mid] <= target <= nums[high]:
+                low = mid + 1
+            else:
+                high = mid - 1
+    return -1
+```
