@@ -181,6 +181,30 @@ One important thing to note here is that we've to use old max_prod and old min_p
 
 ### 153. Find Minimum in Rotated Sorted Array
 
+#### Solution: Binary Search in general case
+
+Find the index of a local peak value in O(logn)
+
+```python
+def findPeak(arr):
+    n = len(arr) 
+    l = 0
+    r = n-1
+     
+    while(l <= r):
+        mid = (l + r) >> 1
+ 
+        if((mid == 0 or arr[mid - 1] <= arr[mid]) and (mid == n - 1 or arr[mid + 1] <= arr[mid])):
+            break
+ 
+        if (mid > 0 and arr[mid - 1] > arr[mid]):
+            r = mid - 1
+        else:
+            l = mid + 1
+ 
+    return mid
+```
+
 #### Solution: Binary Search
 
 1. loop is left < right, which means inside the loop, left always < right
@@ -188,6 +212,10 @@ One important thing to note here is that we've to use old max_prod and old min_p
 3. Therefore, we compare mid with right, since they will never be the same from (2)
 4. if nums[mid] < nums[right], we will know the minimum should be in the left part, so we are moving right.
 5. if nums[mid] > nums[right], minimum should be in the right part, so we are moving left. Since nums[mid] > nums[right],mid can't be the minimum, we can safely move left to mid + 1, which also assure the interval is shrinking
+
+Why we compare nums[mid] and nums[right] instead of nums[left]?
+
+It's best to think about the binary search conditions (for any problem that uses it) in terms of which parts of the array get disqualified for the next iteration. In this case here, we want to find the minimum value and we know the array is "rotated sorted." So, whenever the condition nums[mid] > nums[left] holds, that of course means the value nums[left] is less than nums[mid]. However, it is not a guarantee that there are no smaller values in the right side because the array is rotated.
 
 ```python
 def findMin(self, nums: List[int]) -> int:
@@ -231,4 +259,187 @@ def search(self, nums: List[int], target: int) -> int:
             else:
                 high = mid - 1
     return -1
+```
+
+### 15. 3Sum
+
+#### Solution: Two Pointers
+
+传统双指针，通过大小控制指针运动方向。注意去重剪枝的操作，可以加快运行速度，但对正确与否没有影响。
+
+```python
+def threeSum(self, nums: List[int]) -> List[List[int]]:
+	res = set()
+	nums.sort()
+	for i in range(len(nums)-2):
+	    if i > 0 and nums[i] == nums[i-1]: #去重剪枝
+		continue
+	    l, r = i+1, len(nums)-1
+	    while l < r:
+		s = nums[i] + nums[l] + nums[r]
+		if s < 0:
+		    l +=1 
+		elif s > 0:
+		    r -= 1
+		else:
+		    res.add((nums[i], nums[l], nums[r]))
+		    l += 1
+		    r -= 1
+	return res
+```
+
+### 11. Container With Most Water
+
+#### Solution: Greedy Two Pointers
+
+First, we check the widest possible container starting from the first line to the last one. Next, we ask ourselves, how is it possible to form an even bigger container? Every time we narrow the container, the width becomes smaller so the only way to get a bigger area is to find higher lines. So we just greedily shrink the container on the side that has a shorter line. O(n)
+
+```python
+def maxArea(self, height: List[int]) -> int:
+	l = 0
+	r = len(height)-1
+	res = (r - l) * min(height[l], height[r])
+	while l < r:
+	    if height[l] < height[r]:
+		l += 1
+	    else:
+		r -= 1
+	    res = max(res, (r - l) * min(height[l], height[r]))
+
+	return res
+```
+
+## Binary
+
+### 371. Sum of Two Integers
+
+The first step is to manually bound the length of sum and carry by setting up a mask 0xFFFFFFFF. & this mask with an (very long) integer will only keep the last 32 bits. Then, at each step of the loop, we & sum and carry with this mask, and eventually carry will be wiped out once it goes beyond 32 bits.
+
+Although we successfully get out of the while loop, sadly a consequence is that the value of a also has only 32 bits. If it is a non-negative value then we are fine, but we will lose information if it is negative in the normal sense. So we flip all the bits, then plus one.
+
+```python
+def getSum(self, a: int, b: int) -> int:
+	mask = 0xffffffff
+	a = a & mask
+	while b:
+	    uncarry_sum = (a^b) & mask
+	    carry = ((a&b)<<1) & mask
+	    a = uncarry_sum
+	    b = carry
+	if (a>>31) & 1: # If a is negative in 32 bits sense
+	    return ~(a^mask)
+	return a
+```
+
+### 191. Number of 1 Bits
+
+If we have number n, then n&(n-1) will remove the rightmost in binary representation of n. For example if n = 10110100, then n & (n-1) = 10110100 & 10110011 = 10110000, where & means bitwize operation and. What we need to do now, just repeat this operation until we have n = 0 and count number of steps.
+
+```python
+def hammingWeight(self, n):
+	ans = 0
+	while n:
+		n &= (n-1)
+		ans += 1
+	return ans
+```
+
+### 338. Counting Bits
+
+```python
+def countBits(self, n: int) -> List[int]:
+	counter = [0]
+	for i in range(1, n+1):
+		counter.append(counter[i >> 1] + i % 2)
+	return counter
+```
+
+### 268. Missing Number
+
+```python
+def missingNumber(self, nums: List[int]) -> int:
+	n = len(nums)
+	return int(n * (n+1) / 2 - sum(nums)) # get sum of 1 to n
+```
+
+### 190. Reverse Bits
+
+Create number out, process original number bit by bit from end and add this bit to the end of our out number.
+
+1. out = (out << 1)^(n & 1) adds last bit of n to out, ^ represents XOR
+2. n >>= 1 removes last bit from n.
+
+```python
+def reverseBits(self, n: int) -> int:
+	out = 0
+	for i in range(32):
+		out = (out << 1)^(n & 1)
+		n >>= 1
+	return out
+```
+
+## Dynamic Programming
+
+### 70. Climbing Stairs
+
+```python
+def climbStairs(self, n: int) -> int:
+	if n == 1 or n == 2:
+		return n
+	dp = [0] * (n+1) # considering zero steps we need n+1 places
+	dp[1] = 1
+	dp[2] = 2
+	for i in range(3, n+1):
+		dp[i] = dp[i-1] + dp[i-2]
+
+	return dp[-1]
+```
+
+### 322. Coin Change
+
+完全背包： https://programmercarl.com/0322.%E9%9B%B6%E9%92%B1%E5%85%91%E6%8D%A2.html#_322-%E9%9B%B6%E9%92%B1%E5%85%91%E6%8D%A2
+
+```python
+def coinChange(self, coins: List[int], amount: int) -> int:
+	dp = [amount + 1] * (amount + 1)
+	dp[0] = 0
+
+	for c in coins:
+		for j in range(c, amount+1):
+			dp[j] = min(dp[j], dp[j-c] + 1)
+
+	return dp[amount] if dp[amount] < amount + 1 else -1
+```
+
+### 300. Longest Increasing Subsequence
+
+dp[i]表示i之前包括i的以nums[i]结尾最长上升子序列的长度。 注意递推公式里面，不是要dp[i] 与 dp[j] + 1进行比较，而是我们要取dp[j] + 1的最大值，dp[i]起的是记录作用。
+
+```python
+def lengthOfLIS(self, nums: List[int]) -> int:
+	if len(nums) <= 1:
+		return len(nums)
+	dp = [1] * len(nums)
+	for i in range(1, len(nums)):
+		for j in range(0, i):
+			if nums[i] > nums[j]:
+				dp[i] = max(dp[i], dp[j] + 1)
+	return max(dp)
+```
+
+### 1143. Longest Common Subsequence
+
+根据递推公式，注意遍历顺序，要从前向后，从上到下来遍历。
+
+```python
+def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+	len1, len2 = len(text1)+1, len(text2)+1
+	dp = [[0 for _ in range(len1)] for _ in range(len2)]
+	for i in range(1, len2):
+		for j in range(1, len1):
+			if text1[j-1] == text2[i-1]:
+				dp[i][j] = dp[i-1][j-1] + 1 
+			else:
+				dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+	return dp[-1][-1]
 ```
