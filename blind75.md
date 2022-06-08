@@ -443,3 +443,231 @@ def longestCommonSubsequence(self, text1: str, text2: str) -> int:
 				dp[i][j] = max(dp[i-1][j], dp[i][j-1])
 	return dp[-1][-1]
 ```
+
+### 139. Word Break
+
+d[i] is True if there is a word in the dictionary that ends at ith index of s AND d is also True at the beginning of the word
+
+IF statement meaning: does the current word end at this index AND (did a word end before the start of current word OR does this current word start from the beginning of the string)
+
+```python
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+	dp = [False] * len(s)    
+	for i in range(len(s)):
+		for w in wordDict:
+			if w == s[i-len(w)+1:i+1] and (dp[i-len(w)] or i-len(w) == -1):
+				dp[i] = True
+	return dp[-1]
+```
+
+### 377. Combination Sum IV
+
+完全背包 排列总和: https://programmercarl.com/0377.%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8C%E2%85%A3.html#_377-%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8C-iv
+
+```python
+def combinationSum4(self, nums: List[int], target: int) -> int:
+	dp = [0] * (target + 1)
+	dp[0] = 1
+
+	for j in range(target + 1):
+		for i in range(len(nums)):
+			if j >= nums[i]:
+				dp[j] += dp[j - nums[i]]
+	return dp[-1]
+```
+
+### 198. House Robber
+
+```python
+def rob(self, nums: List[int]) -> int:
+        if len(nums) == 0:
+            return 0
+        if len(nums) == 1:
+            return nums[1]
+
+        dp = [0] * len(nums)
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+        
+        for i in range(2, len(nums)):
+            dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+        return dp[-1]
+```
+
+### 213. House Robber II
+
+Now, what we have here is circular pattern. Imagine, that we have 10 houses: a0, a1, a2, a3, ... a9: Then we have two possible options:
+
+1. Rob house a0, then we can not rob a1 or a9 and we have a2, a3, ..., a8 range to rob
+2. Do not rob house a0, then we have a1, a2, ... a9 range to rob.
+
+```python
+def rob(self, nums: List[int]) -> int:
+
+	def rob_simple(nums):
+		if len(nums) == 0:
+			return 0
+		if len(nums) == 1:
+			return nums[0]
+		dp = [0] * len(nums)
+		dp[0] = nums[0]
+		dp[1] = max(nums[0], nums[1])
+
+		for i in range(2, len(nums)):
+			dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+		return dp[-1]
+
+	return max(nums[0] + rob_simple(nums[2:-1]), rob_simple(nums[1:]))
+```
+
+### 91. Decode Ways
+
+dp[i] = number of ways to decode the string ending at index i
+
+注意out of range的处理
+
+```python
+def numDecodings(self, s: str) -> int:
+	dp = [0] * (len(s))
+	dp[0] = 0 if s[0] == "0" else 1
+
+	for i in range(1, len(s)): 
+		if 0 < int(s[i]) <= 9:
+			dp[i] += dp[i - 1]
+
+		if 10 <= int(s[i-1:i+1]) <= 26:
+			if i > 1:
+				dp[i] += dp[i - 2]
+			else:
+				dp[i] += 1
+
+	return dp[-1]
+```
+
+### 62. Unique Paths
+
+```python
+def uniquePaths(self, m: int, n: int) -> int:
+	dp = [[1 for _ in range(n)] for _ in range(m)]
+
+	for i in range(1,m):
+		for j in range(1,n):
+			dp[i][j] = dp[i-1][j] + dp[i][j-1]
+	return dp[-1][-1]
+```
+
+### 55. Jump Game
+
+#### Solution: Greedy
+
+https://programmercarl.com/0055.%E8%B7%B3%E8%B7%83%E6%B8%B8%E6%88%8F.html#%E6%80%9D%E8%B7%AF
+
+```python
+def canJump(self, nums: List[int]) -> bool:
+	if len(nums) == 1: return True
+	i = cover = 0
+	while i <= cover:
+		cover = max(cover, i + nums[i])
+		if cover >= len(nums)-1:
+			return True
+		i += 1
+
+	return False
+```
+
+#### Solution: DP TLE
+
+dp[i] = whether it can reach stair i from the first stair
+
+```python
+def canJump(self, nums: List[int]) -> bool:
+        dp = [False] * len(nums)
+        dp[0] = True
+        
+        for i in range(len(nums)):
+            for j in range(i):
+                if dp[j] and (j + nums[j] >= i):
+                    dp[i] = True
+        return dp[-1]
+```
+
+#### Solution: DP
+
+DP definition: The farthest index we can reach given allowed steps from 0 to i
+
+DP decision & relationship: It's either the dp[i - 1] or i + nums[i] whichever one is larger
+
+DP condition:
+
+1. If at any moment, dp[i-1] < i, that means there is no way it can reach i, return False immediately.
+2. If at any moment, dp[i] >= last index, that means it can already reach the end of the array given the steps allowed from 0 to i, return True immediately.
+
+```python
+def canJump(self, nums: List[int]) -> bool:
+	dp = [0] * len(nums)
+	dp[0] = nums[0]
+
+	for i in range(1, len(nums) - 1):
+		if dp[i - 1] < i:
+			return False
+
+		dp[i] = max(i + nums[i], dp[i - 1])
+
+		if dp[i] >= len(nums) - 1:
+			return True
+
+	return dp[len(nums) - 2] >= len(nums) - 1
+```
+
+## Graph
+
+### 133. Clone Graph
+
+We use ditionary as a visited set and also use it to record the mapping from the original graph to the new graph
+
+```python
+def cloneGraph(self, node: 'Node') -> 'Node':
+        if not node:
+            return None
+        q = deque([node])
+        mapping ={node : Node(node.val,[])}
+        while q:
+            n = q.popleft()
+            for i in n.neighbors:
+                if i not in mapping:
+                    mapping[i] = Node(i.val,[])
+                    q.append(i)
+                mapping[n].neighbors.append(mapping[i])
+        return mapping[node]
+```
+
+### 207. Course Schedule
+
+Cycle Detection: NOT_CHECKED, CHECKING, COMPLETED = 0, -1, 1
+
+https://leetcode.com/problems/course-schedule/discuss/658379/Python-by-DFS-and-cycle-detection-w-Graph
+
+```python
+def canFinish(self, n: int, prerequisites: List[List[int]]) -> bool:
+	adjList = defaultdict(list)
+	for i in prerequisites:
+		adjList[i[0]].append(i[1])
+	state = [0] * n
+
+	def hasCycle(course):
+		if state[course] == 1:
+			return False
+		if state[course] == -1:
+			return True
+		state[course] = -1
+		for i in adjList[course]:
+			if hasCycle(i):
+				return True
+		state[course] = 1
+		return False
+
+	for i in range(n):
+		if hasCycle(i):
+			return False
+	return True
+```
