@@ -761,3 +761,137 @@ def numIslands(self, grid: List[List[str]]) -> int:
 ```
 
 ### 128. Longest Consecutive Sequence
+
+Expand the sequence from one element and delete visited number along the way. The input num is converted into a set, so each "i in num" is now O(1).
+
+```python
+def longestConsecutive(self, nums: List[int]) -> int:
+	nums = set(nums)
+	maxlen = 0
+	while nums:
+	    first = last = nums.pop()
+	    while first - 1 in nums:
+		first -= 1
+		nums.remove(first)
+	    while last + 1 in nums:
+		last += 1
+		nums.remove(last)
+	    maxlen = max(maxlen, last - first + 1)
+	return maxlen
+```
+
+### 269. Alien Dictionary
+
+There is a new alien language which uses the latin alphabet. However, the order among letters are unknown to you. You receive a list of words from the dictionary, wherewords are sorted lexicographically by the rules of this new language. Derive the order of letters in this language.
+
+For example, given the following words in dictionary,
+
+[
+  "wrt",
+  "wrf",
+  "er",
+  "ett",
+  "rftt"
+]
+
+The correct order is: "wertf".
+
+没太学会：https://www.youtube.com/watch?v=6kTZYvNNyps
+
+### 261. Graph Valid Tree
+
+Given n nodes labeled from 0 to n-1 and a list of undirected edges (each edge is a pair of nodes), write a function to check whether these edges make up a valid tree.
+
+Input: n = 5, and edges = [[0,1], [0,2], [0,3], [1,4]]
+
+Output: true
+
+#### Solution: DFS
+
+https://www.youtube.com/watch?v=bXsUuownnoQ&list=PLot-Xpze53ldVwtstag2TL4HQhAnC8ATf&index=32
+
+Tree properties:
+1. connected: all nodes are visited n == len(visited)
+2. has |V|-1 edges: len(edges) == n - 1
+3. has no cycles: visited set
+
+```python
+def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if not n: return True
+        adj = collections.defaultdict(list)
+        for n1,n2 in edges:
+            adj[n1].append(n2)
+            adj[n2].append(n1)
+        visited = set()
+		def dfs(i, prev):
+			if i in visited:
+				return False
+			visited.add(i)
+			for j in adj[i]:
+				if j == prev:
+					continue
+				if not dfs(j, i):
+					return False
+			return True
+		return dfs(0,-1) and n == len(visited)
+```
+
+#### Solution: BFS
+
+https://zhenyu0519.github.io/2020/03/28/lc261/#261-graph-valid-tree-python
+
+For this question,
+
+1. As a tree, the the number of edges must equal to the number of nodes - 1.
+2. If the given input can build up one valid tree, then there should be only one complete graph which include all nodes.
+
+If the number of edges is the number of nodes - 1, we use BFS start from a certain node and find all related to this node and append them to the visited set. If the final size of the visited set is not equal to the number of nodes. That means there are more than 1 graph can be built by given input. Which is False
+
+```python
+def validTree(self, n: int, edges: List[List[int]]) -> bool:
+	if len(edges)!=n-1:return False
+	dist = collections.defaultdict(list)
+	for n1,n2 in edges:
+		dist[n1].append(n2)
+		dist[n2].append(n1)
+	visited=set()
+	queue=collections.deque([0])
+	while queue:
+		node = queue.popleft()
+		visited.add(node)
+		for related in dist[node]:
+			if related not in visited:
+				visited.add(related)
+				queue.append(related)
+	return len(visited)==n
+```
+
+### 323. Number of Connected Components in an Undirected Graph
+
+Given n nodes labeled from 0 to n - 1 and a list of undirected edges (each edge is a pair of nodes), write a function to find the number of connected components in an undirected graph.
+
+https://zhenyu0519.github.io/2020/03/27/lc323/#sample-io
+
+```python
+def countComponents(self, n: int, edges: List[List[int]]) -> int:
+	dist = collections.defaultdict(list)
+	for source, target in edges:
+		dist[source].append(target)
+		dist[target].append(source)
+	count = 0
+	visited=set()
+	queue = collections.deque()
+	for x in range(n):
+		if x in visited:
+			continue
+		queue.append(x)
+		while queue:
+			source=queue.popleft()
+			if source in visited:
+				continue
+			visited.add(source)
+			for target in dist[source]:
+				queue.append(target)
+		count+=1
+	return count
+```
