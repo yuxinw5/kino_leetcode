@@ -671,3 +671,93 @@ def canFinish(self, n: int, prerequisites: List[List[int]]) -> bool:
 			return False
 	return True
 ```
+
+### 417. Pacific Atlantic Water Flow
+
+#### Solution: DFS
+
+DFS template
+
+```python
+def prob(matrix):
+    # 1. Check for an empty graph.
+    if not matrix:
+        return []
+
+    # 2. Initialize
+    m, n = len(matrix), len(matrix[0])
+    visited = set()
+
+    def dfs(i, j):
+        # a. Check if visited
+        if (i, j) in visited:
+            return
+		# b. Else add to visted
+        visited.add((i, j))
+
+        # c. Traverse neighbors.
+	for (x,y) in (i+1,j), (i-1,j), (i,j+1), (i,j-1):
+            if 0 <= x < m and 0 <= y < n:
+                # d. Add in your question-specific checks.
+                traverse(x, y)
+
+    # 3. For each point, traverse it.
+    for i in range(m):
+        for j in range(n):
+            dfs(i, j)
+```
+
+For this question, we use dfs twice and find the union of the two visited sets(whether it can be reached from a ocean).
+
+```python
+def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+	p_visited = set()
+	a_visited = set()
+	m, n = len(heights), len(heights[0])
+
+	def traverse(i, j, visited):
+	    if (i, j) in visited:
+		return
+	    visited.add((i, j))
+
+	    for (x,y) in (i+1,j), (i-1,j), (i,j+1), (i,j-1):
+		if 0 <= x < m and 0 <= y < n:
+		    if heights[x][y] >= heights[i][j]:
+			traverse(x, y, visited)
+
+	for row in range(m):
+	    traverse(row, 0, p_visited)
+	    traverse(row, n - 1, a_visited)
+
+	for col in range(n):
+	    traverse(0, col, p_visited)
+	    traverse(m - 1, col, a_visited)
+
+	return list(p_visited & a_visited)
+```
+
+### 200. Number of Islands
+
+Another way to keep track of the visited nodes is to edit directly on the matrix.
+
+```python
+def numIslands(self, grid: List[List[str]]) -> int:
+	m = len(grid)
+	n = len(grid[0])
+
+	def dfs(i,j):
+		grid[i][j] = "2"
+		for x,y in [(i+1,j),(i-1,j),(i,j+1),(i,j-1)]:
+			if 0<=x<m and 0<=y<n and grid[x][y] == "1":
+				dfs(x,y)
+
+	count = 0
+	for i in range(m):
+		for j in range(n):
+			if grid[i][j] == "1":
+				dfs(i,j)
+				count += 1
+	return count
+```
+
+### 128. Longest Consecutive Sequence
