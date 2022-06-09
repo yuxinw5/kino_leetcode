@@ -817,23 +817,25 @@ Tree properties:
 
 ```python
 def validTree(self, n: int, edges: List[List[int]]) -> bool:
-        if not n: return True
-        adj = collections.defaultdict(list)
-        for n1,n2 in edges:
-            adj[n1].append(n2)
-            adj[n2].append(n1)
-        visited = set()
-		def dfs(i, prev):
-			if i in visited:
+	if not n: return True
+	adj = collections.defaultdict(list)
+	for n1,n2 in edges:
+		adj[n1].append(n2)
+		adj[n2].append(n1)
+	visited = set()
+	
+	def dfs(i, prev):
+		if i in visited:
+			return False
+		visited.add(i)
+		for j in adj[i]:
+			if j == prev:
+				continue
+			if not dfs(j, i):
 				return False
-			visited.add(i)
-			for j in adj[i]:
-				if j == prev:
-					continue
-				if not dfs(j, i):
-					return False
-			return True
-		return dfs(0,-1) and n == len(visited)
+		return True
+		
+	return dfs(0,-1) and n == len(visited)
 ```
 
 #### Solution: BFS
@@ -895,3 +897,49 @@ def countComponents(self, n: int, edges: List[List[int]]) -> int:
 		count+=1
 	return count
 ```
+
+## Interval
+
+### 57. Insert Interval
+
+Use two variables s and e to remember the current interval that is being checked. 注意检查interval位置的三种情况的分类讨论。
+
+```python
+def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+	s, e = newInterval[0], newInterval[1]
+	left, right = [], []
+
+	for i in intervals:
+		if i[1] < s:
+			left += i,
+		elif i[0] > e:
+			right += i,
+		else:
+			s = min(s, i[0])
+			e = max(e, i[1])
+
+	return left + [[s,e]] + right
+```
+
+### 56. Merge Intervals
+
+Sort the intervals by the start value. Therefore we only need to consider two cases: 
+
+1. no overlap -> simply append the current interval
+2. has overlaps -> merge and append to the end of the result
+
+```python
+def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+	intervals.sort(key=lambda x: x[0])
+	res = []
+	for i in intervals:
+		if not res or res[-1][1] < i[0]:
+			res.append(i)
+		else:
+			last = res.pop()
+			s = min(last[0],i[0])
+			e = max(last[1],i[1])
+			res.append([s,e])
+	return res
+```
+
