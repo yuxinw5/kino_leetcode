@@ -943,3 +943,51 @@ def merge(self, intervals: List[List[int]]) -> List[List[int]]:
 	return res
 ```
 
+### 252. Meeting Rooms
+
+Given an array of meeting time intervals consisting of start and end times [[s1,e1],[s2,e2],…] (si < ei), determine if a person could attend all meetings.
+
+Input: [[0,30],[5,10],[15,20]]
+
+Output: false
+
+https://zhenyu0519.github.io/2020/07/12/lc252/#252-meeting-rooms-python
+
+Sort the list by start time and iterate the sorted list. If the current start time is less than previous end time, then there is conflict and you can not attend all meeting.
+
+```python
+def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+        new_intervals = sorted(intervals, key=lambda x: x[0])
+        for i in range(1,len(new_intervals)):
+            if new_intervals[i-1][1] > new_intervals[i][0]:
+				return False
+        return True
+```
+
+### 253. Meeting Rooms II
+
+Given an array of meeting time intervals consisting of start and end times [[s1,e1],[s2,e2],…] (si < ei), find the minimum number of conference rooms required.
+
+Input: [[0, 30],[5, 10],[15, 20]]
+Output: 2
+
+https://zhenyu0519.github.io/2020/07/13/lc253/#253-meeting-rooms-ii-python
+
+#### Solution: Heap
+
+When you look at first meeting starting time, you will wonder if there is a meeting ends (that means a meeting room is released), if yes, you will just take that one; otherwise, you will find a new room. 
+
+生成优先队列, 代表已开的房间, 先将时间段按照开始时间排序, 遍历时间段, 如果没有多余的房间, 则将这个会议的加到队列里, 如果有多余的房间且目前会议的起始之间在上个会议的终止时间之后, 更新队列.
+
+```python
+def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+	size = len(intervals)
+	heap = []
+	for interval in sorted(intervals):
+		if heap and interval[0] >= heap[0]:
+			# heappushpop(a, x) pushes x onto a before popping the smallest value
+			heapq.heappushpop(heap,interval[1])
+		else:
+			heapq.heappush(heap,interval[1])
+	return len(heap)
+```
