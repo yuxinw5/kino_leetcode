@@ -991,3 +991,255 @@ def minMeetingRooms(self, intervals: List[List[int]]) -> int:
 			heapq.heappush(heap,interval[1])
 	return len(heap)
 ```
+
+## Linked List
+
+### 206. Reverse Linked List
+
+搞清楚结构就好了
+
+#### Solution: Iterative
+
+```python
+def reverseList(self, head):
+    prev = None
+    while head:
+        curr = head
+        head = head.next
+        curr.next = prev
+        prev = curr
+    return prev
+```
+
+#### Solution: Recursive
+
+```python
+def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+	if not head or not head.next:
+		return head
+	node = self.reverseList(head.next)
+	head.next.next = head
+	head.next = None
+	return node
+```
+
+### 141. Linked List Cycle
+
+#### Solution: Mark visited
+
+不需要建visited set，在原有value基础上mark就好
+
+```python
+def hasCycle(self, head: Optional[ListNode]) -> bool:
+	while head:
+		if head.val == None:
+			return True
+		head.val = None
+		head = head.next
+	return False
+```
+
+#### Solution: Two Pointers Loop Detection
+
+If there is a cycle, fast will catch slow after some loops.
+
+```python
+def hasCycle(self, head):
+    slow = fast = head
+    while fast and fast.next:
+        fast = fast.next.next
+        slow = slow.next
+        if slow == fast:
+            return True
+	return False
+```
+
+### 21. Merge Two Sorted Lists
+
+Use dummy node!
+
+```python
+def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+	dummy = ListNode()
+	head = dummy
+	while list1 or list2:
+		if list1 and not list2:
+			dummy.next = ListNode(list1.val)
+			list1 = list1.next
+		elif list2 and not list1:
+			dummy.next = ListNode(list2.val)
+			list2 = list2.next
+		else:
+			if list1.val < list2.val:
+				dummy.next = ListNode(list1.val)
+				list1 = list1.next
+			else:
+				dummy.next = ListNode(list2.val)
+				list2 = list2.next
+		dummy = dummy.next
+	return head.next
+```
+
+Simplified version below.
+
+```python
+def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+	dummy = p = ListNode()
+	while list1 and list2:
+		if list1.val < list2.val:
+			p.next = list1
+			list1 = list1.next
+		else:
+			p.next = list2
+			list2 = list2.next
+		p = p.next
+	p.next = list1 or list2
+	return dummy.next
+```
+
+### 23. Merge k Sorted Lists
+
+#### Solution: Devide and Conquer
+
+Instead of merge 2 lists in sequence, we break it into small cases and use recurtion.
+
+```python
+def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]: 
+	def mergeTwoLists(list1, list2):
+		dummy = p = ListNode()
+		while list1 and list2:
+			if list1.val < list2.val:
+				p.next = list1
+				list1 = list1.next
+			else:
+				p.next = list2
+				list2 = list2.next
+			p = p.next
+		p.next = list1 or list2
+		return dummy.next
+
+	if not lists:
+		return None
+	if len(lists) == 1:
+		return lists[0]
+	mid = len(lists) // 2
+	l, r = self.mergeKLists(lists[:mid]), self.mergeKLists(lists[mid:])
+	return mergeTwoLists(l, r)
+```
+
+#### Solution: Heap
+
+相当于同时比较所有lists当前位置的node。
+
+Why we need idx value stored in the heap? If there are duplicate values in the list, we will get "TypeError: '<' not supported between instances of 'ListNode' and 'ListNode'".
+
+```python
+def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]: 
+	q = []
+	for idx, head in enumerate(lists):
+		if head is not None:
+			q.append((head.val, idx, head))
+	heapq.heapify(q)
+	dummy = ListNode()
+	last = dummy
+	while q:
+		val, idx, node = heapq.heappop(q)
+		last.next, last = node, node
+		if node.next is not None:
+			heapq.heappush(q, (node.next.val, idx, node.next))
+	return dummy.next
+```
+
+### 19. Remove Nth Node From End of List
+
+https://programmercarl.com/0019.%E5%88%A0%E9%99%A4%E9%93%BE%E8%A1%A8%E7%9A%84%E5%80%92%E6%95%B0%E7%AC%ACN%E4%B8%AA%E8%8A%82%E7%82%B9.html#%E6%80%9D%E8%B7%AF
+
+```python
+def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+	head_dummy = ListNode()
+	head_dummy.next = head
+
+	slow, fast = head_dummy, head_dummy
+	for _ in range(n): 
+		fast = fast.next
+
+	while(fast.next!=None):
+		slow = slow.next
+		fast = fast.next
+
+	slow.next = slow.next.next
+	return head_dummy.next
+```
+
+### 143. Reorder List
+
+#### Solution: Intuitive
+
+https://leetcode.com/problems/reorder-list/discuss/801971/Python-O(n)-by-two-pointers-w-Visualization
+
+```python
+def reorderList(self, head: Optional[ListNode]) -> None:
+	"""
+	Do not return anything, modify head in-place instead.
+	"""
+	# Save linked list in array
+	arr = []
+	cur, length = head, 0
+
+	while cur:
+		arr.append( cur )
+		cur, length = cur.next, length + 1
+
+	# Reorder with two-pointers
+	left, right = 0, length-1
+	last = head
+
+	while left < right:
+		arr[left].next = arr[right]
+		left += 1
+
+		if left == right: 
+			last = arr[right]
+			break
+
+		arr[right].next = arr[left]
+		right -= 1
+		last = arr[left]
+
+	if last: last.next= None
+```
+
+#### Solution: Find Middle, Reverse, and Merge
+
+https://leetcode.com/problems/reorder-list/discuss/801883/Python-3-steps-to-success-explained
+
+```python
+def reorderList(self, head):
+	#step 1: find middle
+	if not head: return []
+	slow, fast = head, head
+	while fast.next and fast.next.next:
+		slow = slow.next
+		fast = fast.next.next
+
+	#step 2: reverse second half
+	prev, curr = None, slow.next
+	while curr:
+		nextt = curr.next
+		curr.next = prev
+		prev = curr
+		curr = nextt    
+	slow.next = None
+
+	#step 3: merge lists
+	head1, head2 = head, prev
+	while head1 and head2:
+		nxt1 = head1.next
+		nxt2 = head2.next
+
+		head1.next = head2
+		head1 = nxt1
+
+		head2.next = head1
+		head2 = nxt2
+```
