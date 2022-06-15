@@ -1243,3 +1243,156 @@ def reorderList(self, head):
 		head2.next = head1
 		head2 = nxt2
 ```
+
+## Matrix
+
+### 73. Set Matrix Zeroes
+
+```python
+def setZeroes(self, matrix: List[List[int]]) -> None:
+	"""
+	Do not return anything, modify matrix in-place instead.
+	"""
+	m = len(matrix)
+	n = len(matrix[0])
+	iis = set()
+	jjs = set()
+
+	for i in range(m):
+		for j in range(n):
+			if matrix[i][j] == 0:
+				iis.add(i)
+				jjs.add(j)
+
+	for x in iis:
+		for j in range(n):
+			matrix[x][j] = 0
+	for i in range(m):
+		for y in jjs:
+			matrix[i][y] = 0
+```
+
+### 54. Spiral Matrix
+
+注意最后剩下item的处理
+
+```python
+def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+	m = len(matrix[0])
+	n = len(matrix)
+	res = []
+
+	left = 0
+	right = m - 1
+	top = 0
+	bottom = n - 1
+	while left < right and top < bottom:
+		for i in range(left, right):
+			res.append(matrix[top][i])
+
+		for i in range(top, bottom):
+			res.append(matrix[i][right])
+
+		for i in range(right, left, -1):
+			res.append(matrix[bottom][i])
+
+		for i in range(bottom, top, -1):
+			res.append(matrix[i][left])
+
+		top += 1
+		right -= 1
+		bottom -= 1
+		left += 1
+
+	if top==bottom and left == right:
+		res.append(matrix[left][left])
+	elif left == right and top < bottom: # n X 1 matrix
+		for i in range(top, bottom+1):
+			res.append(matrix[i][left])
+	elif top == bottom and left < right: ## 1 X n matrix
+		for i in range(left, right+1):
+			res.append(matrix[top][i]) 
+	return res
+```
+
+### 48. Rotate Image
+
+first reverse up to down, then swap the symmetry 
+
+https://leetcode.com/problems/rotate-image/discuss/18872/A-common-method-to-rotate-the-image
+
+```python
+def rotate(self, A: List[List[int]]) -> None:
+	"""
+	Do not return anything, modify matrix in-place instead.
+	"""
+	A.reverse()
+	for i in range(len(A)):
+		for j in range(i):
+			A[i][j], A[j][i] = A[j][i], A[i][j]
+```
+
+### 79. Word Search
+
+#### Solution: DFS + Backtracking
+
+思路和正常dfs思路是一样的，重要的是visited的处理。在保证同一条路经每个位置只经过一次的情况下，还要保证如果经过了一个位置，但此位置不符合要求，要从visited中移除。
+
+```python
+def exist(self, board: List[List[str]], word: str) -> bool:
+	m = len(board)
+	n = len(board[0])
+
+	def dfs(i,j,path):
+		if path == word:
+			return True
+		visited.add((i,j))
+		for x,y in (i+1,j),(i-1,j),(i,j+1),(i,j-1):
+			if 0<=x<m and 0<=y<n and (x,y) not in visited:
+				if len(path) < len(word) and board[x][y] == word[len(path)]:
+					if dfs(x,y,path + board[x][y]):
+						return True
+		visited.remove((i,j))
+
+	for i in range(m):
+		for j in range(n):
+			if board[i][j] == word[0]:
+				visited = set()
+				if dfs(i,j,word[0]):
+					return True
+	return False
+```
+
+## String
+
+### 3. Longest Substring Without Repeating Characters
+
+#### Solution: Sliding Window
+
+If s[r] not in seen, we can keep increasing the window size by moving right pointer.
+
+There are two cases if s[r] in seen:
+1.s[r] is inside the current window, we need to change the window by moving left pointer to seen[s[r]] + 1.
+2.s[r] is not inside the current window, we can keep increase the window
+
+```python
+def lengthOfLongestSubstring(self, s: str) -> int:
+	seen = {}
+	l = 0
+	output = 0
+	for r in range(len(s)):
+		if s[r] not in seen:
+			output = max(output,r-l+1)
+		else:
+			if seen[s[r]] < l:
+				output = max(output,r-l+1)
+			else:
+				l = seen[s[r]] + 1
+		seen[s[r]] = r
+	return output
+```
+
+### 424. Longest Repeating Character Replacement
+
+```python
+```
