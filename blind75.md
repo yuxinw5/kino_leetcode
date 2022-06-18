@@ -1394,5 +1394,306 @@ def lengthOfLongestSubstring(self, s: str) -> int:
 
 ### 424. Longest Repeating Character Replacement
 
+#### Solution: Sliding Window
+
+maxf means the max frequency of the same character in the sliding window. The condition of the sliding window is j-i+1>maxf+k, which means that the current window no longer satisfied the condition and we need to move the left pointer. In the process, we also keep track of the max length which is the final answer.
+
+```python
+def characterReplacement(self, s: str, k: int) -> int:
+	maxf = i = 0
+	count = defaultdict(int)
+	res = 0
+	for j in range(len(s)):
+		count[s[j]] += 1
+		maxf = max(maxf, count[s[j]])
+		if j - i + 1 > maxf + k:
+			count[s[i]] -= 1
+			i += 1
+		res = max(res, j-i+1)
+	return res
+```
+
+### 76. Minimum Window Substring
+
+sliding window的关键在于什么时候扩张和什么时候缩紧，本题运用了两个Counter来跟踪当前窗口的字母和个数，并且用一个var来表示当前是否满足条件。满足的条件是：1. s中的字符c存在于t中 2. c在t中的个数和c在当前窗口下的个数一致
+
+```python
+def minWindow(self, s: str, t: str) -> str:
+    counter_t = collections.Counter(t)
+    counter_s = collections.defaultdict(int)
+
+    left = 0
+    satisfied = 0
+    result = ""
+
+
+    for right in range(len(s)):
+        char = s[right]
+        if char in counter_t:
+            counter_s[char] += 1
+            if counter_s[char] == counter_t[char]:
+                satisfied += 1
+
+
+        while satisfied == len(counter_t):
+            if not result or (right - left + 1) < len(result):
+                result = s[left:right+1]
+            left_char = s[left]
+            if left_char in counter_t and counter_s[left_char] == counter_t[left_char]:
+                satisfied -= 1
+            counter_s[left_char] -= 1
+            left+=1
+
+    return result
+```
+
+### 242. Valid Anagram
+
+dict是可以直接比较的
+
+```python
+def isAnagram(self, s: str, t: str) -> bool:
+	return Counter(s) == Counter(t)
+```
+
+### 49. Group Anagrams
+
+利用anagram中字符全部一致的特性，用sort做common feature。
+
+```python
+def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+	cnt = defaultdict(list)
+
+	for word in strs:
+		key = ''.join(sorted(word))
+		cnt[key].append(word)
+
+	return list(cnt.values())
+```
+
+### 20. Valid Parentheses
+
+```python
+def isValid(self, s: str) -> bool:
+	stack = []
+	for c in s:
+		if c == '(' or c == '{' or c == '[':
+			stack.append(c)
+		if  (c == ')' or c == '}' or c == ']') and not stack:
+			return False
+
+		if c == ')' and stack:
+			if stack[-1] == '(':
+				stack.pop()
+			else: return False
+		if c == '}' and stack:
+			if stack[-1] == '{':
+				stack.pop()
+			else: return False
+		if c == ']' and stack:
+			if stack[-1] == '[':
+				stack.pop()
+			else: return False
+
+	if not stack:
+		return True
+	else:
+		return False
+```
+
+### 125. Valid Palindrome
+
+isalnum() returns True if all characters in the string are alphanumeric (either alphabets or numbers)
+
+```python
+def isPalindrome(self, s: str) -> bool:
+	l, r = 0, len(s) - 1
+	while l < r:
+		if not s[l].isalnum():
+			l += 1
+		elif not s[r].isalnum():
+			r -= 1
+		else:
+			if s[l].lower() != s[r].lower():
+				return False
+			else:
+				l += 1
+				r -= 1
+	return True
+```
+
+### 5. Longest Palindromic Substring
+
+#### Solution: DP
+
+首先定义 P（i,j): 
+
+P(i,j) = True s[i,j] 是回文串, P(i,j)= False s[i,j] 不是回文串
+
+接下来 P(i,j) = (P(i+1,j−1) && S[i]==S[j])
+
+```python
+def longestPalindrome(self, s: str) -> str:
+	n = len(s)
+	dp = [[False] * n for _ in range(n)]
+
+	res = ""
+	for i in range(n):
+		dp[i][i] = True
+		res = s[i]
+
+	for i in range(n-1,-1,-1):
+		for j in range(i+1, n):
+			if s[i] == s[j]:
+				if j-i == 1 or dp[i+1][j-1]:
+					dp[i][j] = True
+					if j-i+1 > len(res):
+						res = s[i:j+1]
+	return res
+```
+
+#### Solution: 中心扩展
+
+我们知道回文串一定是对称的，所以我们可以每次循环选择一个中心，进行左右扩展，判断左右字符是否相等即可。O(N^2)
+
+```python
+def longestPalindrome(self, s):
+    res = ""
+    for i in range(len(s)):
+        # odd case, like "aba"
+        tmp = self.helper(s, i, i)
+        if len(tmp) > len(res):
+            res = tmp
+        # even case, like "abba"
+        tmp = self.helper(s, i, i+1)
+        if len(tmp) > len(res):
+            res = tmp
+    return res
+ 
+# get the longest palindrome, l, r are the middle indexes   
+# from inner to outer
+def helper(self, s, l, r):
+    while l >= 0 and r < len(s) and s[l] == s[r]:
+        l -= 1; r += 1
+    return s[l+1:r]
+```
+
+### 647. Palindromic Substrings
+
+思路跟上面的题一样
+
+```python
+def countSubstrings(self, s: str) -> int:
+	n = len(s)
+	res = 0
+	dp = [[False] * n for _ in range(n)]
+
+	for i in range(n):
+		dp[i][i] = True
+		res += 1
+
+	for i in range(n-1,-1,-1):
+		for j in range(i+1, n):
+			if s[i] == s[j]:
+				if j-i==1 or dp[i+1][j-1]:
+					dp[i][j] = True
+					res += 1
+	return res
+```
+
+### 271. Encode and Decode Strings
+
+Design an algorithm to encode a list of strings to a string. The encoded string is then sent over the network and is decoded back to the original list of strings.
+
+Use a special sequence to denote the end of a string, and escape the sequence. Be careful of empty string and empty input as they’re different!
+
+```python
+class Codec:
+    def encode(self, strs):
+        """Encodes a list of strings to a single string.
+
+        :type strs: List[str]
+        :rtype: str
+        """
+        if len(strs) == 0:
+            return ""
+        else:
+            return "//".join([s.replace("/", "#/#") for s in strs]) + "//"
+
+
+    def decode(self, s):
+        """Decodes a single string to a list of strings.
+
+        :type s: str
+        :rtype: List[str]
+        """
+        if len(s) == 0:
+            return []
+        return [seg.replace("#/#", "/") for seg in s.split("//")][:-1]
+```
+
+## Tree
+
+### 104. Maximum Depth of Binary Tree
+
+#### Solution: Recursive
+
+```python
+def maxDepth(self, root: Optional[TreeNode]) -> int:
+	if not root:
+		return 0
+	return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+```
+
+#### Solution: Iterative Level Order Traversal
+
+```python
+def maxDepth(self, root: Optional[TreeNode]) -> int:
+	if root == None:
+		return 0
+
+	q = [root]
+	res = []
+	while q:
+		s = len(q)
+		r = []
+		for _ in range(s):
+			node = q.pop(0)
+			r.append(node)
+			if node.left: q.append(node.left)
+			if node.right: q.append(node.right)
+		res.append(r)
+	return len(res)
+```
+
+### 100. Same Tree
+
+```python
+def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+	if not p and not q: return True
+	if not p and q: return False
+	if p and not q: return False
+	if p and q and p.val != q.val: return False
+
+	l = self.isSameTree(p.left, q.left)
+	r = self.isSameTree(p.right, q.right)
+
+	return l and r
+```
+
+### 226. Invert Binary Tree
+
+```python
+def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+	if not root:
+		return None
+	root.left, root.right = root.right, root.left
+	self.invertTree(root.left)
+	self.invertTree(root.right)
+	return root
+```
+
+### 124. Binary Tree Maximum Path Sum
+
 ```python
 ```
