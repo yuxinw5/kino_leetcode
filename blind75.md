@@ -1860,3 +1860,119 @@ def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
 	inorder(root)
 	return res[k-1]
 ```
+
+### 235. Lowest Common Ancestor of a Binary Search Tree
+
+利用BST的特性，看看当前root是否在范围内
+
+```python
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+	if root.val > p.val and root.val > q.val:
+		return self.lowestCommonAncestor(root.left, p, q)
+	if root.val < p.val and root.val < q.val:
+		return self.lowestCommonAncestor(root.right, p, q)
+	return root
+```
+
+### 236. Lowest Common Ancestor of a Binary Tree
+
+如果找到一个节点，发现左子树出现结点p，右子树出现节点q，或者 左子树出现结点q，右子树出现节点p，那么该节点就是节点p和q的最近公共祖先。
+
+但是如果p或者q本身就是最近公共祖先呢？其实只需要找到一个节点是p或者q的时候，直接返回当前节点，无需继续递归子树。如果接下来的遍历中找到了后继节点满足第一种情况则修改返回值为后继节点，否则，继续返回已找到的节点即可。
+
+```python
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+	if not root or q == root or p == root:
+		return root
+	l = self.lowestCommonAncestor(root.left,p,q)
+	r = self.lowestCommonAncestor(root.right, p, q)
+	if l and r:
+		return root
+	if l:
+		return l
+	return r
+```
+
+### 208. Implement Trie (Prefix Tree)
+
+注意父子node的链接，用dict来记录父子关系。node = node.children[w]之前省略了node.children[w] = TrieNode()，因为默认值已经存在了。
+
+```python
+class TrieNode():
+    def __init__(self):
+        self.children = collections.defaultdict(TrieNode)
+        self.isWord = False
+        
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for w in word:
+            node = node.children[w]
+        node.isWord = True
+
+    def search(self, word: str) -> bool:
+        node = self.root
+        for w in word:
+            node = node.children.get(w)
+            if not node:
+                return False
+        return node.isWord
+
+    def startsWith(self, prefix: str) -> bool:
+        node = self.root
+        for w in prefix:
+            node = node.children.get(w)
+            if not node:
+                return False
+        return True
+```
+
+### 211. Design Add and Search Words Data Structure
+
+#### Solution: Trie + DFS
+
+If word[i] is an English letter, we find that exact node on the tree and go deeper along that branch.
+
+If word[i] is ".", every next node is matched, but we don't know which node branch we should go. Hence, we will try every next node.
+
+注意node本身是没有存value的，意味着node的信息是存储在dict的key里面的。
+
+```python
+class Node:
+    def __init__(self):
+        self.children = collections.defaultdict(Node)
+        self.isWord = False
+
+class WordDictionary:
+
+    def __init__(self):
+        self.root = Node()
+
+    def addWord(self, word: str) -> None:
+        if not word:
+            return
+        node = self.root
+        for s in word:
+            node = node.children[s]
+        node.isWord = True
+
+    def search(self, word: str) -> bool:
+        
+        def dfs(root, i):
+            if i == len(word):
+                return root.isWord
+            if word[i] == '.':
+                for n in root.children:
+                    if dfs(root.children[n], i+1):
+                        return True
+            if word[i] in root.children:
+                if dfs(root.children[word[i]], i+1):
+                    return True
+            return False
+            
+        return dfs(self.root, 0)
+```
