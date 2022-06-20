@@ -1697,3 +1697,166 @@ def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
 
 ```python
 ```
+
+### 102. Binary Tree Level Order Traversal
+
+```python
+def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+	if not root:
+		return root
+	q = [root]
+	res = []
+	while q:
+		s = len(q)
+		r = []
+		for _ in range(s):
+			n = q.pop(0)
+			r.append(n.val)
+			if n.left: q.append(n.left)
+			if n.right: q.append(n.right)
+		res.append(r)
+	return res
+```
+
+### 297. Serialize and Deserialize Binary Tree
+
+#### Solution: Recursive Preorder 
+
+https://leetcode.com/problems/serialize-and-deserialize-binary-tree/discuss/396124/Python-very-easy-to-understand-recursive-preorder-with-comments
+
+```python
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        if not root: return 'x'
+        return ','.join([str(root.val), self.serialize(root.left), self.serialize(root.right)])
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        self.data = data
+        if self.data[0] == 'x': return None
+        node = TreeNode(self.data[:self.data.find(',')]) 
+        node.left = self.deserialize(self.data[self.data.find(',')+1:])
+        node.right = self.deserialize(self.data[self.data.find(',')+1:])
+        return node
+```
+
+### 572. Subtree of Another Tree
+
+先确定base case是什么，一般都是单个node比较，但是这个题是比较两个tree
+
+```python
+def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+	def isSameTree(p, q) -> bool:
+		if not p and not q: return True
+		if not p and q: return False
+		if p and not q: return False
+		if p and q and p.val != q.val: return False
+
+		l = isSameTree(p.left, q.left)
+		r = isSameTree(p.right, q.right)
+
+		return l and r
+
+	if not root: 
+		return False
+	if isSameTree(root, subRoot): 
+		return True
+	return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
+```
+
+### 105. Construct Binary Tree from Preorder and Inorder Traversal
+
+先切割中序数组，中序数组大小一定是和后序/前序数组的大小相同的。
+
+```python
+def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+	if not preorder:
+		return None
+	root = preorder[0]
+	rnode = TreeNode(root)
+	i = inorder.index(root)
+	li = inorder[:i]
+	ri = inorder[i+1:]
+
+	lp = preorder[1:1+len(li)]
+	rp = preorder[1+len(li):]
+
+	rnode.left = self.buildTree(lp, li)
+	rnode.right = self.buildTree(rp, ri)
+
+	return rnode
+```
+
+### 98. Validate Binary Search Tree
+
+BST的中序遍历是sorted的
+
+```python
+def isValidBST(self, root: Optional[TreeNode]) -> bool:
+	res = []
+	def inorder(root):
+		if not root:
+			return
+		inorder(root.left)
+		res.append(root.val)
+		inorder(root.right)
+
+	inorder(root)
+	if len(res) <= 1:
+		return True
+	for i in range(1, len(res)):
+		if res[i] <= res[i-1]:
+			return False
+	return True
+```
+
+### 230. Kth Smallest Element in a BST
+
+#### Solution: Recursive
+
+k is a global var because we need to keep track of the number we have counted, so we cannot pass k in the funtion as a parameter.
+
+```python
+def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+	self.k = k
+	self.res = None
+
+	def inorder(node):
+		if not node:
+			return
+		inorder(node.left)
+		self.k -= 1
+		if self.k == 0:
+			self.res = node.val
+			return
+		inorder(node.right)
+
+	inorder(root)
+	return self.res
+```
+
+#### Solution: Iterative
+
+```python
+def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+	def inorder(root):
+		if root:
+			inorder(root.left)
+			res.append(root.val)
+			inorder(root.right)
+
+	res = []
+	if not root: return 0
+	inorder(root)
+	return res[k-1]
+```
