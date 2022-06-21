@@ -1895,7 +1895,7 @@ def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -
 
 ### 208. Implement Trie (Prefix Tree)
 
-注意父子node的链接，用dict来记录父子关系。node = node.children[w]之前省略了node.children[w] = TrieNode()，因为默认值已经存在了。
+注意父子node的链接，用dict来记录父子关系。子node其实是作为dict的key的，所以defaultdict是下一个TrieNode而不是List。node = node.children[w]之前省略了node.children[w] = TrieNode()，因为默认值已经存在了。
 
 ```python
 class TrieNode():
@@ -1975,4 +1975,199 @@ class WordDictionary:
             return False
             
         return dfs(self.root, 0)
+```
+
+### 212. Word Search II
+
+#### Solution: Trie + DFS (TLE)
+
+```python
+class TrieNode():
+    def __init__(self):
+        self.children = collections.defaultdict(TrieNode)
+        self.isWord = False
+    
+class Trie():
+    def __init__(self):
+        self.root = TrieNode()
+    
+    def insert(self, word):
+        node = self.root
+        for w in word:
+            node = node.children[w]
+        node.isWord = True
+    
+    def startsWith(self, prefix: str) -> bool:
+        node = self.root
+        for w in prefix:
+            node = node.children.get(w)
+            if not node:
+                return False
+        return True
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        trie = Trie()
+        for w in words:
+            trie.insert(w)
+            
+        def dfs(i,j,path,res):
+            if path in words and path not in res:
+                res.append(path)
+                words.remove(path)
+                
+            c = board[i][j]           
+            board[i][j] = "#"
+            for x,y in (i+1,j),(i-1,j),(i,j+1),(i,j-1):
+                if 0<=x<m and 0<=y<n and trie.startsWith(path+board[x][y]):
+                    dfs(x,y,path+board[x][y],res)
+            board[i][j] = c
+                
+        m = len(board)
+        n = len(board[0])
+        res = []
+
+        for i in range(m):
+            for j in range(n):
+                if trie.startsWith(board[i][j]):
+                    dfs(i,j,board[i][j],res)
+        return res
+```
+
+#### Solution: Sometimes TLE
+
+```python
+class TrieNode():
+    def __init__(self):
+        self.children = collections.defaultdict(TrieNode)
+        self.isWord = False
+    
+class Trie():
+    def __init__(self):
+        self.root = TrieNode()
+    
+    def insert(self, word):
+        node = self.root
+        for w in word:
+            node = node.children[w]
+        node.isWord = True
+
+class Solution(object):
+
+    def findWords(self, board, words):
+        m = len(board)
+        n = len(board[0])
+        t = Trie()
+        for word in words:
+            t.insert(word)
+
+        result = []
+        visited = [[False] * n for _ in range(m)]
+
+        def dfs(i, j, node, path):
+            nonlocal visited
+            if i < 0 or i >= m or j < 0 or j >= n or visited[i][j] or \
+                    board[i][j] not in node.children:
+                return
+            c = board[i][j]
+            path += c
+            if node.children[c].isWord:
+                if path not in result:
+                    result.append(path)
+                if len(node.children[c].children) == 0:
+                    return
+            visited[i][j] = True
+            for x, y in (i+1,j),(i-1,j),(i,j+1),(i,j-1):
+                dfs(x, y, node.children[c], path)
+            visited[i][j] = False
+            path = path[:len(path) - 1]
+
+        for r in range(m):
+            for c in range(n):
+                dfs(r, c, t.root, "")
+        return result
+```
+
+## Heap
+
+### 347. Top K Frequent Elements
+
+#### Solution: Heap
+
+Here we have pushed -count[i] to replicate max heap behaviour.
+
+```python
+def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+	c = Counter(nums)
+	q = []
+	for i,v in c.items():
+		heapq.heappush(q,(-v,i))
+
+	res = []
+	for i in range(k):
+		v,key = heapq.heappop(q)
+		res.append(key)
+
+	return res
+```
+
+#### Solution: Bucket Sort 
+
+O(n) 
+
+1. Create list of empty lists for bucktes: for frequencies 1, 2, ..., n.
+2. Use Counter to count frequencies of elements in nums
+3. Iterate over our Counter and add elements to corresponding buckets.
+4. Buckets is list of lists now, create one big list out of it.
+5. Take the k last elements from this list
+
+```python
+def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+	buckets = [[] for _ in range(len(nums) + 1)]
+	number_count = Counter(nums)
+
+	for num, freq in number_count.items():
+		buckets[freq].append(num)
+
+	flat_list = []
+	for i in range(len(buckets) - 1, -1, -1):
+		bucket = buckets[i]
+		if bucket:
+			for num in bucket:
+				flat_list.append(num)
+	return flat_list[:k]
+```
+
+### 295. Find Median from Data Stream
+
+#### Solution: Double Heaps
+
+The invariant of the algorithm is two heaps, small and large, each represent half of the current list. The length of smaller half is kept to be n / 2 at all time and the length of the larger half is either n / 2 or n / 2 + 1 depend on n's parity.
+
+Any time before we add a new number, there are two scenarios, (total n numbers, k = n / 2):
+
+1. length of (small, large) == (k, k)
+2. length of (small, large) == (k, k + 1)
+
+In the first scenario, we know the large will gain one more item and small will remain the same size, but we cannot just push the item into large. What we should do is we push the new number into small and pop the maximum item from small then push it into large (all the pop and push here are heappop and heappush). By doing this kind of operations for the two scenarios we can keep our invariant.
+
+Therefore to add a number, we have 3 O(log n) heap operations.
+
+```python
+class MedianFinder:
+    def __init__(self):
+        self.small = []  # the smaller half of the list, max heap (invert min-heap)
+        self.large = []  # the larger half of the list, min heap
+
+    def addNum(self, num):
+        if len(self.small) == len(self.large):
+            heappush(self.large, -heappushpop(self.small, -num))
+        else:
+            heappush(self.small, -heappushpop(self.large, num))
+
+    def findMedian(self):
+        if len(self.small) == len(self.large):
+            return float(self.large[0] - self.small[0]) / 2.0
+        else:
+            return float(self.large[0])
 ```
