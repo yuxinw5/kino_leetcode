@@ -347,6 +347,8 @@ def flatten(self, root: Optional[TreeNode]) -> None:
         root.left = None
 ```
 
+## Postorder
+
 ### 104. Maximum Depth of Binary Tree
 
 简单的递归，极致的享受
@@ -406,6 +408,45 @@ https://leetcode.com/problems/binary-tree-maximum-path-sum/discuss/603423/Python
 还是要复习思路
 
 ### 250. Count Univalue Subtrees
+
+Given the root of a binary tree, return the number of uni-value subtrees.
+
+A uni-value subtree means all nodes of the subtree have the same value.
+
+#### Solution: Bottom Up
+
+Just check the whether the left and right subtrue are uni-value or not
+
+If left and right subtruee are uni-vale, then check whether the node value and the value of two subtrees are the same.
+
+```python
+def countUnivalSubtrees(self, root: TreeNode) -> int:
+        self.res = 0
+        self.helper(root)
+        return self.res
+        
+def helper(self, node):
+    if node:
+        if not node.left and not node.right:
+            self.res += 1
+            return node.val
+        if node.left and node.right:
+            left = self.helper(node.left)
+            right = self.helper(node.right)
+            if left!= node.val or right!=node.val:
+                return None
+        elif node.left:
+            left = self.helper(node.left)
+            if left!= node.val:
+                return None
+        else:
+            right = self.helper(node.right)
+            if right!= node.val:
+                return None
+
+        self.res+=1
+        return node.val
+```
 
 ### 366. Find Leaves of Binary Tree
 
