@@ -911,3 +911,71 @@ def recoverTree(self, root: Optional[TreeNode]) -> None:
 
     first.val, second.val = second.val, first.val
 ```
+
+### 116. Populating Next Right Pointers in Each Node
+
+#### Solution: Level Order Traversal
+
+取queue的最前面的作为next node，很妙
+
+```python
+def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if not root:
+            return None
+        queue = [root]
+        while queue:
+            n = len(queue)
+            for i in range(n):
+                node = queue.pop(0)
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+                if i == n - 1:
+                    break
+                node.next = queue[0]
+        return root
+```
+
+#### Solution: Recursive
+
+```python
+def connect1(self, root):
+    if root and root.left and root.right:
+        root.left.next = root.right
+        if root.next:
+            root.right.next = root.next.left #这个是关键
+        self.connect(root.left)
+        self.connect(root.right)
+```
+
+### 117. Populating Next Right Pointers in Each Node II
+
+传统level order可以参考上一题，但这样是O(n) space。 下面这种是O(1), 值得看看。
+
+The algorithm is a BFS or level order traversal. We go through the tree level by level. node is the pointer in the parent level, tail is the tail pointer in the child level.
+The parent level can be view as a singly linked list or queue, which we can traversal easily with a pointer.
+Connect the tail with every one of the possible nodes in child level, update it only if the connected node is not nil.
+
+```python
+def connect(self, node):
+    tail = dummy = TreeLinkNode(0)
+    while node:
+        tail.next = node.left#dummy.next = node.left
+        if tail.next:#如果有左崽子
+            tail = tail.next#tail变成左崽子
+        tail.next = node.right#如果没有左崽子，dummy.next = node.right
+        if tail.next:#如果有右崽子
+            tail = tail.next#tail变成右崽子
+        node = node.next#在本层移动
+        if not node:
+            tail = dummy
+            node = dummy.next#崽子层最左边一个
+```
+
+### 314. Binary Tree Vertical Order Traversal
+
+### 96. Unique Binary Search Trees
+
+### 95. Unique Binary Search Trees II
+
