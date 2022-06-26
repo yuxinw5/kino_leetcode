@@ -405,7 +405,23 @@ def isBalanced(self, root):
 
 https://leetcode.com/problems/binary-tree-maximum-path-sum/discuss/603423/Python-Recursion-stack-thinking-process-diagram
 
-还是要复习思路
+```python
+def maxPathSum(self, root: Optional[TreeNode]) -> int:
+    max_path = float("-inf")
+    def get_max_gain(node):
+        nonlocal max_path
+        if not node:
+            return 0
+        gain_left = max(get_max_gain(node.left), 0)
+        gain_right = max(get_max_gain(node.right), 0)
+        current_path = node.val +  gain_left + gain_right
+        max_path = max(max_path, current_path)
+
+        return node.val + max(gain_left, gain_right)
+
+    get_max_gain(root)
+    return max_path		
+```
 
 ### 250. Count Univalue Subtrees
 
@@ -476,7 +492,18 @@ Redefine rob(root) as a new function which will return an array of two elements,
 https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem
 
 ```python
+def rob(self, root: Optional[TreeNode]) -> int:
+    result = self.rob_tree(root)
+    return max(result[0], result[1])
 
+def rob_tree(self, node):
+    if node is None:
+        return (0, 0)
+    left = self.rob_tree(node.left)
+    right = self.rob_tree(node.right)
+    val1 = node.val + left[1] + right[1]
+    val2 = max(left[0], left[1]) + max(right[0], right[1])
+    return (val1, val2)
 ```
 
 ### 107. Binary Tree Level Order Traversal II
@@ -698,7 +725,6 @@ class BSTIterator:
         top = self.stack.pop()
         self.root = top.right
         return top.val
-
 
     def hasNext(self) -> bool:
         return self.root or self.stack
@@ -975,7 +1001,72 @@ def connect(self, node):
 
 ### 314. Binary Tree Vertical Order Traversal
 
+Given a binary tree, return the vertical order traversal of its nodes' values. (ie, from top to bottom, column by column).
+
+If two nodes are in the same row and column, the order should be from left to right.
+
+https://www.cnblogs.com/lightwindy/p/8661594.html
+
+BFS + 字典. 我们构造字典, 储存列值和对应的节点值, 设根节点的列值为0, 那么它的左节点的列是-1, 右节点的列是1, 然后使用广度优先搜索, 将每层的节点和对应的列数放入q, 然后更新字典. 最后我们将字典的键升序排列, 求对应的值即可.
+
+```python
+def verticalOrder(root):
+    if not root: return []
+    cols = defaultdict(list)
+    q = [(root, 0)]
+    while q:
+        s = len(q)
+        for _ in range(s):
+            node,col = q.pop(0)
+            cols[col].append(node.val)
+
+            if node.left:
+                q.append((node.left, col-1))
+            if node.right:
+                q.append((node.right, col+1))
+        
+    return [cols[c] for c in sorted(cols.keys())]
+```
+
 ### 96. Unique Binary Search Trees
+
+When we choose i as root node, we will have nodes from 1...i-1 (i-1 nodes in total) in left sub-tree and nodes from i+1...n (n-i nodes in total) in the right side. We can then form numTrees(i-1) BSTs for left sub-tree and numTrees(n-i) BSTs for the right sub-tree. The total number of structurally unique BSTs formed having root i will be equal to product of these two, i.e, numTrees(i-1) * numTrees(n-i)
+
+```python
+def numTrees(self, n: int) -> int:
+    dp = [0] * (n + 1)
+    dp[0], dp[1] = 1, 1
+    for i in range(2, n + 1):
+        for j in range(1, i + 1):
+            dp[i] += dp[j - 1] * dp[i - j]
+    return dp[-1]
+```
 
 ### 95. Unique Binary Search Trees II
 
+https://leetcode.com/problems/unique-binary-search-trees-ii/discuss/929000/Recursive-solution-long-explanation
+
+```python
+def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
+    if n == 0:
+        return []
+    return self.helper(1, n)
+
+def helper(self, start, end):
+    if start > end:
+        return [None] 
+
+    all_trees = []
+    for curRootVal in range(start, end+1):
+        all_left_subtrees = self.helper(start, curRootVal-1)
+        all_right_subtrees = self.helper(curRootVal+1, end) 
+
+        for left_subtree in all_left_subtrees:
+            for right_subtree in all_right_subtrees:
+                curRoot = TreeNode(curRootVal) 
+                curRoot.left = left_subtree
+                curRoot.right = right_subtree
+                all_trees.append(curRoot)
+
+    return all_trees
+```
