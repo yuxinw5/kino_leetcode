@@ -149,3 +149,158 @@ Numbers can be regarded as product of its factors. For example,
   
 Write a function that takes an integer n and return all possible combinations of its factors.
 
+思路：DFS + backtracking。每次搜索从最小的一个因子开始到sqrt(n)查看之间的数是否可以被n整除，如果可以那么有两种选择：
+
+1. n 除以这个因子，并保持这个因子， 然后进行下一层搜索。
+
+2. 不再进行下一层搜索，保存当前结果。
+
+```python
+def getFactors(self, n: int) -> List[List[int]]:
+    res = []
+    self.helper(res, 2, [], n)
+    return res
+
+def helper(self, res, start, temp, remain):
+    if remain==1 and len(temp)>1:
+        res.append(temp)
+    else:    
+        for i in range(start, remain+1):
+            if remain%i == 0:
+                self.helper(res, i, temp+[i], remain//i)
+```
+
+### 46. Permutations
+
+```python
+def permute(self, nums: List[int]) -> List[List[int]]:
+    def dfs(nums, path):
+        if not nums:
+            res.append(path)
+        for i in range(len(nums)):
+            dfs(nums[:i] + nums[i+1:], path+[nums[i]])
+    res = []
+    dfs(nums, [])
+    return res
+```
+
+### 47. Permutations II
+
+```python
+def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+    def dfs(nums, path):
+        if not nums and path not in res:
+            res.append(path)
+        for i in range(len(nums)):
+            dfs(nums[:i] + nums[i+1:], path+[nums[i]])
+    res = []
+    dfs(nums, [])
+    return res
+```
+
+### 31. Next Permutation
+
+https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
+
+一个需要死记硬背的算法
+
+```python
+def nextPermutation(self, nums: List[int]) -> None:
+    """
+    Do not return anything, modify nums in-place instead.
+    """
+    # To find next permutations, we'll start from the end
+    i = j = len(nums)-1
+    # First we'll find the first non-increasing element starting from the end
+    while i > 0 and nums[i-1] >= nums[i]:
+        i -= 1
+    # After completion of the first loop, there will be two cases
+    # 1. Our i becomes zero (This will happen if the given array is sorted decreasingly). In this case, we'll simply reverse the sequence and will return 
+    if i == 0:
+        nums.reverse()
+        return 
+    # 2. If it's not zero then we'll find the first number grater then nums[i-1] starting from end
+    while nums[j] <= nums[i-1]:
+        j -= 1
+    # Now out pointer is pointing at two different positions
+    # i. first non-assending number from end
+    # j. first number greater than nums[i-1]
+
+    # We'll swap these two numbers
+    nums[i-1], nums[j] = nums[j], nums[i-1]
+
+    # We'll reverse a sequence strating from i to end
+    nums[i:]= nums[len(nums)-1:i-1:-1]
+```
+
+### 60. Permutation Sequence
+
+### 291. Word Pattern II
+
+### 17. Letter Combinations of a Phone Number
+
+下面这样写虽然结果是正确的，但思路完全是混乱的！for i in range(len(nums)) 这一行本质是为了收缩可选择的范围，参考题目77，是为了从左向右取数，取过的数，不在重复取。因此下面这样写就会导致有很多结果略过了前面的数，比如“23”直接从3开始取数。虽然len(path) == len(digits)保证了最后的结果是正确的，但做了很多无用功。
+
+本题最明显的特征是每一个数字代表的是不同集合，也就是求不同集合之间的组合，不存在取还是不取/从哪开始取的问题，每一步都需要取用，所以只能一个digit向后推。因此第二种写法更正确。
+
+```python
+def letterCombinations(self, digits: str) -> List[str]:
+    dic = {2:['a','b','c'], 3:['d','e','f'], 4:['g','h','i'], 5:['j','k','l'], 6:['m','n','o'], 7:['p','q','r','s'], 8:['t','u','v'], 9:['w','x','y','z']}
+
+    def dfs(nums, path):
+        if len(path) == len(digits):
+            res.append(path)
+        for i in range(len(nums)):
+            for c in dic[int(nums[i])]:
+                dfs(nums[i+1:], path + c)
+
+    if digits == "":
+        return []
+    res = []
+    dfs(list(digits), "")
+    return res
+```
+
+```python
+def letterCombinations(self, digits: str) -> List[str]:
+    dic = {2:['a','b','c'], 3:['d','e','f'], 4:['g','h','i'], 5:['j','k','l'], 6:['m','n','o'], 7:['p','q','r','s'], 8:['t','u','v'], 9:['w','x','y','z']}
+
+    def dfs(nums, path):
+        if not nums:
+            res.append(path)
+            return
+        for c in dic[int(nums[0])]:
+            dfs(nums[1:], path + c)
+
+    if digits == "":
+        return []
+    res = []
+    dfs(list(digits), "")
+    return res
+```
+
+### 320. Generalized Abbreviation
+
+### 282. Expression Add Operators
+
+### 140. Word Break II
+
+传统backtrack做法，可以直接用i来表示词的可能结尾index，并不需要另一个loop来遍历。
+
+```python
+def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:                
+    def dfs(s, path):
+        if not s:
+            res.append(path)
+        for i in range(1,len(s)+1):
+            if s[:i] in wordDict:
+                if path == "":
+                    dfs(s[i:], path + s[:i])
+                else:
+                    dfs(s[i:], path +" "+ s[:i])
+    res = []
+    dfs(s,"")
+    return res
+```
+
+### 351. Android Unlock Patterns
