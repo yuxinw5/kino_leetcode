@@ -237,6 +237,59 @@ def nextPermutation(self, nums: List[int]) -> None:
 
 ### 291. Word Pattern II
 
+Given a pattern and a string str, find if str follows the same pattern.
+
+Here follow means a full match, such that there is a bijection between a letter in pattern and a non-empty substring in str.
+
+Example 1:
+
+Input: pattern = "abab", str = "redblueredblue"
+
+Output: true
+
+Example 2:
+
+Input: pattern = "aabb", str = "xyzabcxzyabc"
+
+Output: false
+
+这道题跟上面一道题290的唯一区别在于，现在的S是连续的。对于连续的S，比较常见的做法就是用backtracking进行暴力搜索。通过backtracking将他分割成所有可能的combination，并且判断双向的对应关系是否符合。具体流程如下：
+
+1. 给定一个pattern所在的位置i，s中所在的位置j
+2. 首先判断pattern[i]有没有已经存在的映射，如果有的话，那么现在s[j:j+k]对应的word要和现在pattern[i]对应的word相同，然后进行下一层matching，否则证明已经不符合matching
+3. 如果pattern[i]不存在已知映射，那么我们应该枚举pattern[i]映射到以j为index开始的任意的s中的sub string对应，这边就需要backtracking
+
+```python
+def wordPatternMatch(self, pattern: str, str: str) -> bool:
+    def match(i,j):
+        is_match = False
+        if i==len(pattern) and j==len(str):
+            is_match = True
+
+        elif i<len(pattern) and j<len(str):
+            p = pattern[i]
+            if p in p2w:
+                w = p2w[p]
+                if w==str[j:j+len(w)]:
+                    is_match = match(i+1,j+len(w))
+            else:
+                for k in range(j,len(str)):
+                    w = str[j:k+1]
+                    if w not in w2p:
+                        w2p[w],p2w[p] = p,w
+                        is_match = match(i+1,k+1)
+                        w2p.pop(w)
+                        p2w.pop(p)
+
+                    if is_match:
+                        break
+        return is_match
+
+    w2p = {}
+    p2w = {}
+    return match(0,0)
+```
+
 ### 17. Letter Combinations of a Phone Number
 
 下面这样写虽然结果是正确的，但思路完全是混乱的！for i in range(len(nums)) 这一行本质是为了收缩可选择的范围，参考题目77，是为了从左向右取数，取过的数，不在重复取。因此下面这样写就会导致有很多结果略过了前面的数，比如“23”直接从3开始取数。虽然len(path) == len(digits)保证了最后的结果是正确的，但做了很多无用功。
@@ -281,7 +334,58 @@ def letterCombinations(self, digits: str) -> List[str]:
 
 ### 320. Generalized Abbreviation
 
+Write a function to generate the generalized abbreviations of a word.
+
+Input: "word"
+
+Output: ["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
+
+https://www.cnblogs.com/grandyang/p/5261569.html
+
+这个题没看明白
+
 ### 282. Expression Add Operators
+
+Given a string that contains only digits 0-9 and a target value, return all possibilities to add binary operators (not unary) +, -, or * between the digits so they evaluate to the target value.
+
+Example 1:
+
+Input: num = "123", target = 6
+Output: ["1+2+3", "1*2*3"] 
+
+Example 2:
+
+Input: num = "232", target = 8
+Output: ["2*3+2", "2+3*2"]
+
+https://github.com/zhuifengshen/awesome-leetcode/blob/master/docs/Leetcode_Solutions/Python/0282._Expression_Add_Operators.md
+
+我们要注意的是一个式子不能以+,-,* 开头，并且不能出现以‘0’开头的数字。时间复杂度: O(4^n)- 空间复杂度: O(N)
+
+```python
+def addOperators(self, num, target):
+    def addOperators(self, num: str, target: int) -> List[str]:
+        res = []
+        for i in range(len(num)):
+            if i!=0 and num[0]=='0':
+                break
+            self.helper(num[i+1:], target, num[:i+1], 0, int(num[:i+1]), res)
+        return res
+
+    def helper(self, num, target, path, temp, last, res):
+        if not num:
+            if temp+last==target:
+                res.append(path)
+            return
+        
+        for i in range(len(num)):
+            if i!=0 and num[0]=='0':
+                break
+            number = num[:i+1]
+            self.helper(num[i+1:], target, path+"*"+number, temp, last*int(number), res)
+            self.helper(num[i+1:], target, path+"+"+number, temp+last, int(number), res)
+            self.helper(num[i+1:], target, path+"-"+number, temp+last, -int(number), res)
+```
 
 ### 140. Word Break II
 
@@ -304,3 +408,59 @@ def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
 ```
 
 ### 351. Android Unlock Patterns
+
+Given an Android 3x3 key lock screen and two integers m and n, where 1 ≤ m ≤ n ≤ 9, count the total number of unlock patterns of the Android lock screen, which consist of minimum of m keys and maximum n keys.
+
+Rules for a valid pattern:
+
+1. Each pattern must connect at least m keys and at most n keys.
+2. All the keys must be distinct.
+3. If the line connecting two consecutive keys in the pattern passes through any other keys, the other keys must have previously selected in the pattern. No jumps through non selected key is allowed.
+4. The order of keys used matters.
+
+https://www.cnblogs.com/grandyang/p/5541012.html
+
+https://github.com/xiaoningning/LeetCode-python/blob/master/351%20Android%20Unlock%20Patterns.py
+
+这道题乍一看题目这么长以为是一个设计题，其实不是，这道题还是比较有意思的，起码跟实际结合的比较紧密。这道题说的是安卓机子的解锁方法，有9个数字键，如果密码的长度范围在 [m, n] 之间，问所有的解锁模式共有多少种，注意题目中给出的一些非法的滑动模式。那么先来看一下哪些是非法的，首先1不能直接到3，必须经过2，同理的有4到6，7到9，1到7，2到8，3到9，还有就是对角线必须经过5，例如1到9，3到7等。建立一个二维数组 jumps，用来记录两个数字键之间是否有中间键，然后再用一个一位数组 visited 来记录某个键是否被访问过，然后用递归来解，先对1调用递归函数，在递归函数中，遍历1到9每个数字 next，然后找他们之间是否有 jump 数字，如果 next 没被访问过，并且 jump 为0，或者 jump 被访问过，对 next 调用递归函数。数字1的模式个数算出来后，由于 1,3,7,9 是对称的，所以乘4即可，然后再对数字2调用递归函数，2,4,6,9 也是对称的，再乘4，最后单独对5调用一次
+
+```python
+class Solution(object):
+    def __init__(self):
+        self.skip = [[None for _ in xrange(10)] for _ in xrange(10)]
+        self.skip[1][3], self.skip[3][1] = 2, 2
+        self.skip[1][7], self.skip[7][1] = 4, 4
+        self.skip[3][9], self.skip[9][3] = 6, 6
+        self.skip[7][9], self.skip[9][7] = 8, 8
+        self.skip[4][6], self.skip[6][4] = 5, 5
+        self.skip[2][8], self.skip[8][2] = 5, 5
+        self.skip[1][9], self.skip[9][1] = 5, 5
+        self.skip[3][7], self.skip[7][3] = 5, 5
+
+    def numberOfPatterns(self, m, n):
+        visited = [False for _ in xrange(10)]
+        return sum(
+            self.dfs(1, visited, remain) * 4 +
+            self.dfs(2, visited, remain) * 4 +
+            self.dfs(5, visited, remain)
+            for remain in xrange(m, n+1)
+        )
+
+    def dfs(self, cur, visited, remain):
+        if remain == 1:
+            return 1
+
+        visited[cur] = True
+        ret = 0
+        for nxt in xrange(1, 10):
+            if (
+                not visited[nxt] and (
+                    self.skip[cur][nxt] is None or
+                    visited[self.skip[cur][nxt]]
+                )
+            ):
+                ret += self.dfs(nxt, visited, remain - 1)
+
+        visited[cur] = False
+        return ret
+```
