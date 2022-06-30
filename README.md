@@ -1,4 +1,4 @@
-# leetcode_with_kino
+# kino_leetcode
 
 ## Practice List
 
