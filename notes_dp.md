@@ -204,8 +204,6 @@ def minDistance(self, word1: str, word2: str) -> int:
 
 ### 97. Interleaving String
 
-#### Solution: DP
-
 dp[i][j] represents isInterleave(s1[:i], s[:j], s3[:i+j])
 
 我们定义一个 boolean 二维数组 dp [ i ] [ j ] 来表示 s1[ 0, i ) 和 s2 [ 0, j ） 组合后能否构成 s3 [ 0, i + j )，注意不包括右边界，主要是为了考虑开始的时候如果只取 s1，那么 s2 就是空串，这样的话 dp [ i ] [ 0 ] 就能表示 s2 取空串。这个dummy设置的真的很妙
@@ -239,3 +237,139 @@ def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
 
 ### 174. Dungeon Game
 
+dp[i][j] be the minimum hp we need to reach the princess if we start from point (i,j) 有时候正着想解不出来可以考虑倒着想想看
+
+We need to look at two cells: dp[i+1][j] and dp[i][j+1] and evaluate two possible candidates: dp[i+1][j]-dungeon[i][j] and dp[i][j+1]-dungeon[i][j].
+
+1. If at least one of these two numbers is negative, it means that we can survive just with 1 hp: (look at number +30 in our table for example)
+2. If both this numbers are positive, we need to take the mimumum of them, see for example number -10 in our table: to survive we need either 5- -10 = 15 if we go right and 1- -10 = 11 if we go down, of course we choose 11.
+
+why I put 1 to two neibors of princess? To make this formula valid for princess cell: if we have negative number like -5 in this cell, we need 6 hp to survive, if we have non-negative number in this cell, we need 1 hp to survive. 边界条件的处理也很妙
+
+```python
+def calculateMinimumHP(self, dungeon: List[List[int]]) -> int:
+    m = len(dungeon)
+    n = len(dungeon[0])
+
+    dp = [[float("inf")]*(n+1) for _ in range(m+1)]
+    dp[m-1][n] = 1
+    dp[m][n-1] = 1
+
+    for i in range(m-1,-1,-1):
+        for j in range(n-1,-1,-1):
+            need = min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j]
+            if need>0:
+                dp[i][j] = need
+            else:
+                dp[i][j] = 1
+
+    return dp[0][0]
+```
+
+### 221. Maximal Square
+
+dp(i,j) represents the side length of the maximum square whose bottom right corner is the cell with index (i,j) in the original matrix.
+
+https://leetcode.com/problems/maximal-square/solution/
+
+取最小值是要保证左边右边和斜上方都要一起考虑到，凡是有一个缺角，都要考虑
+
+```python
+def maximalSquare(self, matrix: List[List[str]]) -> int:
+    if matrix is None or len(matrix) < 1:
+        return 0
+
+    rows = len(matrix)
+    cols = len(matrix[0])
+
+    dp = [[0]*(cols+1) for _ in range(rows+1)]
+    max_side = 0
+
+    for r in range(rows):
+        for c in range(cols):
+            if matrix[r][c] == '1':
+                dp[r+1][c+1] = min(dp[r][c], dp[r+1][c], dp[r][c+1]) + 1 
+                max_side = max(max_side, dp[r+1][c+1])
+
+    return max_side * max_side
+```
+
+### 85. Maximal Rectangle
+
+### 363. Max Sum of Rectangle No Larger Than K
+
+### 198. House Robber
+
+经典选还是不选的问题
+
+```python
+def rob(self, nums: List[int]) -> int:
+    if len(nums) == 0:
+        return 0
+    if len(nums) == 1:
+        return nums[1]
+
+    dp = [0] * len(nums)
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+
+    for i in range(2, len(nums)):
+        dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+    return dp[-1]
+```
+
+### 213. House Robber II
+
+A natural way is to split into 3 cases: 1. rub the first without robbing the last, 2. rub the last without rubbing the first, 3. neither rub the first nor the last.
+
+In not rob the 1st house, two cases are included, 2. rub the last without rubbing the first, 3. neither rub the first nor the last.
+
+In not rob the last house, two cases are included, 1. rub the first without robbing the last, 3. neither rub the first nor the last.
+
+Since we want the maximum value, we can have overlaps
+
+```python
+def rob(self, nums: List[int]) -> int:
+    def rob_simple(nums):
+        if len(nums) == 0:
+            return 0
+        if len(nums) == 1:
+            return nums[0]
+        dp = [0] * len(nums)
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+
+        for i in range(2, len(nums)):
+            dp[i] = max(nums[i] + dp[i-2], dp[i-1])
+        return dp[-1]
+
+    return max(nums[0] + rob_simple(nums[2:-1]), rob_simple(nums[1:]))
+```
+
+### 276. Paint Fence
+
+### 91. Decode Ways
+
+注意边界条件的处理
+
+```python
+def numDecodings(self, s: str) -> int:
+    dp = [0] * (len(s))
+    dp[0] = 0 if s[0] == "0" else 1
+
+    for i in range(1, len(s)): 
+        if 0 < int(s[i]) <= 9:
+            dp[i] = dp[i - 1]
+
+        if 10 <= int(s[i-1:i+1]) <= 26:
+            if i > 1:
+                dp[i] += dp[i - 2]
+            else:
+                dp[i] += 1
+
+    return dp[-1]
+```
+
+### 10. Regular Expression Matching
+
+### 44. Wildcard Matching
