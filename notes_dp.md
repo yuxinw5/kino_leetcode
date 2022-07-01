@@ -141,3 +141,101 @@ def coinChange(self, coins: List[int], amount: int) -> int:
 ```
 
 ## 二维
+
+### 256. Paint House
+
+### 265. Paint House II
+
+### 64. Minimum Path Sum
+
+没什么好说的，注意边界处理，这个题甚至不用extra space，直接原grid edit
+
+```python
+def minPathSum(self, grid: List[List[int]]) -> int:
+    m = len(grid)
+    n = len(grid[0])
+
+    for i in range(1,n):
+      grid[0][i] += grid[0][i-1]
+
+    for i in range(1,m):
+      grid[i][0] += grid[i-1][0]
+
+    for i in range(1,m):
+      for j in range(1,n):
+          grid[i][j] += min(grid[i-1][j], grid[i][j-1])
+    return grid[-1][-1]
+```
+
+### 72. Edit Distance
+
+Let dp(i, j) is the minimum number of operations required to convert s1[0..i-1] string to s2[0..j-1] string.
+
+To compute dp(i, j):
+
+Base case:
+
+1. If i == 0 then we need to insert j chars to convert "" into s2[0..j-1]
+2. If j == 0 then we need to delete i chars to convert s1[0..i-1] into ""
+
+If s1[i-1] == s2[j-1] then dp(i, j) = dp(i-1, j-1)
+
+Else: Choose the minimum cost among 3 operators
+
+1. Delete: dp(i-1, j) + 1
+2. Insert: dp(i, j-1) + 1
+3. Replace: dp(i-1, j-1) + 1
+
+```python
+def minDistance(self, word1: str, word2: str) -> int:
+    dp = [[0] * (len(word2)+1) for _ in range(len(word1)+1)]
+    for i in range(len(word1)+1):
+        dp[i][0] = i
+    for j in range(len(word2)+1):
+        dp[0][j] = j
+    for i in range(1, len(word1)+1):
+        for j in range(1, len(word2)+1):
+            if word1[i-1] == word2[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) + 1
+    return dp[-1][-1]
+```
+
+### 97. Interleaving String
+
+#### Solution: DP
+
+dp[i][j] represents isInterleave(s1[:i], s[:j], s3[:i+j])
+
+我们定义一个 boolean 二维数组 dp [ i ] [ j ] 来表示 s1[ 0, i ) 和 s2 [ 0, j ） 组合后能否构成 s3 [ 0, i + j )，注意不包括右边界，主要是为了考虑开始的时候如果只取 s1，那么 s2 就是空串，这样的话 dp [ i ] [ 0 ] 就能表示 s2 取空串。这个dummy设置的真的很妙
+
+最开始想复杂了，其实不需要循环之前的index看能不能组成，只需要看上一个就可以了。
+
+```python
+def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+    if len(s1)+len(s2)!=len(s3):
+        return False
+
+    dp = [[False]*(len(s1)+1) for _ in range(len(s2)+1)]
+    dp[0][0] = True
+
+    for j in range(1, len(dp[0])):
+        dp[0][j] = s1[j-1]== s3[j-1]
+        if not dp[0][j]:
+            break
+
+    for i in range(1, len(dp)):
+        dp[i][0] = s2[:i]==s3[:i]
+        if not dp[i][0]:
+            break
+
+    for i in range(1, len(dp)):
+        for j in range(1, len(dp[0])):
+            dp[i][j] = (dp[i-1][j] and s2[i-1]==s3[i+j-1]) or (dp[i][j-1] and s1[j-1]==s3[i+j-1])
+
+    return dp[-1][-1]
+```
+
+### 174. Dungeon Game
+
