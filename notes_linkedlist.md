@@ -330,3 +330,128 @@ def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) ->
 ```
 
 ## 提高
+
+### 234. Palindrome Linked List
+
+To save space:
+
+```python
+def isPalindrome(self, head: Optional[ListNode]) -> bool:
+    fast = slow = head
+    # find the mid node
+    while fast and fast.next:
+        fast = fast.next.next
+        slow = slow.next
+    # reverse the second half
+    node = None
+    while slow:
+        nxt = slow.next
+        slow.next = node
+        node = slow
+        slow = nxt
+    # compare the first and second half nodes
+    while node: # while node and head:
+        if node.val != head.val:
+            return False
+        node = node.next
+        head = head.next
+    return True
+```
+
+### 143. Reorder List
+
+#### Solution: Optimited Two Pointer
+
+O(n) time, O(1) space
+
+```python
+def reorderList(self, head: Optional[ListNode]) -> None:
+    if not head:
+        return
+
+    # find the mid point
+    slow = fast = head 
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+    # reverse the second half in-place
+    pre, node = None, slow
+    while node:
+        pre, node.next, node = node, pre, node.next
+    
+    # Merge in-place; Note : the last node of "first" and "second" are the same
+    first, second = head, pre
+    while second.next:
+        first.next, first = second, first.next
+        second.next, second = first, second.next
+    return 
+```
+
+#### Solution: Two Pointer
+
+```python
+def reorderList(self, head: Optional[ListNode]) -> None:
+    """
+    Do not return anything, modify head in-place instead.
+    """
+    # Save linked list in array
+    arr = []
+    cur, length = head, 0
+
+    while cur:
+        arr.append( cur )
+        cur, length = cur.next, length + 1
+
+    # Reorder with two-pointers
+    left, right = 0, length-1
+    last = head
+
+    while left < right:
+        arr[left].next = arr[right]
+        left += 1
+
+        if left == right: 
+            last = arr[right]
+            break
+
+        arr[right].next = arr[left]
+        right -= 1
+        last = arr[left]
+
+    if last: last.next= None
+```
+
+### 142. Linked List Cycle II
+
+Fast: 快的指针走的步数，每次走两步
+
+Slow：慢指针走的步数，每次走一步
+
+L1: 起点到cycle entry的距离
+
+L2: cycle entry到尾部的距离
+
+Fast = 2 Slow
+
+相遇时，fast比slow多走一圈，所以有fast - slow = l2, 所以当前slow = L2
+
+如图，可以算出阴影部分长度，亦即相遇点到尾部长度为L1 + L2 - slow = L1
+
+此时加一个指针，让新指针和slow同时走，这两个指针相遇时则为entry
+
+```python
+def detectCycle(self, head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            break
+    else:
+        return None
+    while head != slow:
+        slow = slow.next
+        head = head.next
+    return head
+```
