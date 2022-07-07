@@ -647,6 +647,8 @@ Cycle Detection: NOT_CHECKED, CHECKING, COMPLETED = 0, -1, 1
 
 https://leetcode.com/problems/course-schedule/discuss/658379/Python-by-DFS-and-cycle-detection-w-Graph
 
+注意循环里面call hasCycle之后一定要立刻return，不然他会继续向下走，就会return错误结果。
+
 ```python
 def canFinish(self, n: int, prerequisites: List[List[int]]) -> bool:
 	adjList = defaultdict(list)
@@ -1425,7 +1427,6 @@ def minWindow(self, s: str, t: str) -> str:
     left = 0
     satisfied = 0
     result = ""
-
 
     for right in range(len(s)):
         char = s[right]
