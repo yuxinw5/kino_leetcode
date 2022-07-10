@@ -205,19 +205,19 @@
 | 127                    | [Word Ladder](https://leetcode.com/problems/word-ladder/description/) |
 | 126                    | [Word Ladder   II](https://leetcode.com/problems/word-ladder-ii/description/) |
 | 51                     | [N-Queens](https://leetcode.com/problems/n-queens/)          |
-| 单点BFS                   |                                                              |
-| 690                   |                                                              |
-| 1236                   |                                                              |
-| 多点BFS                   |                                                              |
-| 994                   |                                                              |
-| 542                   |                                                              |
-| 1162                   |                                                              |
-| 层数BFS                   |                                                              |
-| 815                   |                                                              |
-| 1091                   |                                                              |
-| 773                   |                                                              |
-| 934                   |                                                              |
-| 279                   |                                                              |
+| 单点BFS                |                                                              |
+| 690                    | [Employee Importance](https://leetcode.com/problems/employee-importance/) |
+| 1236                   | [Web Crawler](https://leetcode.com/problems/web-crawler/) |
+| 多点BFS                |                                                              |
+| 994                    | [Rotting Oranges](https://leetcode.com/problems/rotting-oranges/) |
+| 542                    | [01 Matrix](https://leetcode.com/problems/01-matrix/) |
+| 1162                   | [As Far from Land as Possible](https://leetcode.com/problems/as-far-from-land-as-possible/) |
+| 层数BFS                |                                                              |
+| 815                    | [Bus Routes](https://leetcode.com/problems/bus-routes/) |
+| 1091                   | [Shortest Path in Binary Matrix](https://leetcode.com/problems/shortest-path-in-binary-matrix/) |
+| 773                    | [Sliding Puzzle](https://leetcode.com/problems/sliding-puzzle/) |
+| 934                    | [Shortest Bridge](https://leetcode.com/problems/shortest-bridge/) |
+| 279                    | [Perfect Squares](https://leetcode.com/problems/perfect-squares/) |
 
 
 | Union  Find            |                                                              |
