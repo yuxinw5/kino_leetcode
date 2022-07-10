@@ -205,7 +205,19 @@
 | 127                    | [Word Ladder](https://leetcode.com/problems/word-ladder/description/) |
 | 126                    | [Word Ladder   II](https://leetcode.com/problems/word-ladder-ii/description/) |
 | 51                     | [N-Queens](https://leetcode.com/problems/n-queens/)          |
-| 52                     | [N-Queens II](https://leetcode.com/problems/n-queens-ii/description/) |
+| 单点BFS                   |                                                              |
+| 690                   |                                                              |
+| 1236                   |                                                              |
+| 多点BFS                   |                                                              |
+| 994                   |                                                              |
+| 542                   |                                                              |
+| 1162                   |                                                              |
+| 层数BFS                   |                                                              |
+| 815                   |                                                              |
+| 1091                   |                                                              |
+| 773                   |                                                              |
+| 934                   |                                                              |
+| 279                   |                                                              |
 
 
 | Union  Find            |                                                              |
