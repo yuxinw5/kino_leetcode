@@ -220,28 +220,26 @@
 | 279                    | [Perfect Squares](https://leetcode.com/problems/perfect-squares/) |
 
 
-| Union  Find            |                                                              |
-| ---------------------- | ------------------------------------------------------------ |
-| 261                    | [Graph   Valid Tree](https://leetcode.com/problems/graph-valid-tree/description/) |
-| 323                    | [Number   of Connected Components in an Undirected Graph](https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/description/) |
-| 305                    | [Number   of Islands II](https://leetcode.com/problems/number-of-islands-ii/description/) |
-
-
 | Graph                  |                                                              |
 | ---------------------- | ------------------------------------------------------------ |
 | 基础                   |                                                              |
 | 133                    | [Clone Graph](https://leetcode.com/problems/clone-graph/description/) |
 | 399                    | [Evaluate   Division](https://leetcode.com/problems/evaluate-division/description/) |
 | 310                    | [Minimum   Height Trees](https://leetcode.com/problems/minimum-height-trees/description/) |
+| Union  Find            |                                                              |
+| 261                    | [Graph   Valid Tree](https://leetcode.com/problems/graph-valid-tree/description/) |
+| 323                    | [Number   of Connected Components in an Undirected Graph](https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/description/) |
+| 305                    | [Number   of Islands II](https://leetcode.com/problems/number-of-islands-ii/description/) |
 | 图形学                 |                                                              |
 | 149                    | [Max   Points on a Line](https://leetcode.com/problems/max-points-on-a-line/description/) |
-
-
 | Trie                   |                                                              |
-| ---------------------- | ------------------------------------------------------------ |
 | 208                    | [Implement   Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/description/) |
 | 211                    | [Add   and Search Word - Data structure design](https://leetcode.com/problems/add-and-search-word-data-structure-design/description/) |
 | 212                    | [Word Search   II](https://leetcode.com/problems/word-search-ii/description/) |
+| Topological  Sort      |                                                              |
+| 207                    | [Course   Schedule](https://leetcode.com/problems/course-schedule/description/) |
+| 210                    | [Course   Schedule II](https://leetcode.com/problems/course-schedule-ii/description/) |
+| 269                    | [Alien   Dictionary](https://leetcode.com/problems/alien-dictionary/description/) |
 
 
 | Matrix                 |                                                              |
@@ -292,13 +290,6 @@
 | 389                    | [Find   the Difference](https://leetcode.com/problems/find-the-difference/description/) |
 | 136                    | [Single Number](https://leetcode.com/problems/single-number/description/) |
 | 318                    | [Maximum   Product of Word Lengths](https://leetcode.com/problems/maximum-product-of-word-lengths/description/) |
-
-
-| Topological  Sort      |                                                              |
-| ---------------------- | ------------------------------------------------------------ |
-| 207                    | [Course   Schedule](https://leetcode.com/problems/course-schedule/description/) |
-| 210                    | [Course   Schedule II](https://leetcode.com/problems/course-schedule-ii/description/) |
-| 269                    | [Alien   Dictionary](https://leetcode.com/problems/alien-dictionary/description/) |
 
 
 | Random                 |                                                              |
