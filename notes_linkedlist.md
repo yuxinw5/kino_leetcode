@@ -4,6 +4,23 @@
 
 ### 206. Reverse Linked List
 
+#### Solution: Iterative
+
+这个版本更实用，要牢牢记住，注意要track tail node
+
+```python
+def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+    pre = None
+    while head:
+        temp = head.next
+        head.next = pre
+        pre = head
+        head = temp
+    return pre
+```
+
+#### Solution: Recursive
+
 ```python
 def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
     if not head or not head.next:
@@ -455,3 +472,37 @@ def detectCycle(self, head):
         head = head.next
     return head
 ```
+
+### 148. Sort List
+
+用merge sort，体现一个分治的思想。两个关键点：1.快慢指针找middle point的方法要烂熟于心 2. merge用dummy head
+
+```python
+class Solution:
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head or not head.next:
+            return head
+        fast, slow = head.next, head
+        while fast and fast.next:
+            fast = fast.next.next
+            slow = slow.next
+        start = slow.next
+        slow.next = None
+        l, r = self.sortList(head), self.sortList(start)
+        return self.merge(l, r)
+    
+    def merge(self, h1, h2):
+        dummy = tail = ListNode(None)
+        while h1 and h2:
+            if h1.val < h2.val:
+                tail.next, h1 = h1, h1.next
+            else:
+                tail.next, h2 = h2, h2.next
+            tail = tail.next
+    
+        tail.next = h1 or h2
+        return dummy.next
+```
+
+### 25. Reverse Nodes in k-Group
+
