@@ -506,3 +506,157 @@ class Solution:
 
 ### 25. Reverse Nodes in k-Group
 
+#### Solution: Recursive
+
+其实很好想，注意base case是长度不够k或者k是0或1，剩下的情况就是reverse k然后衔接
+
+```python
+def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+    l, node = 0, head
+    while node:
+        l += 1
+        node = node.next
+    if k <= 1 or l < k:
+        return head
+
+    pre = None
+    current = head
+    for _ in range(k):
+        temp = current.next
+        current.next = pre
+        pre = current
+        current = temp
+    head.next = self.reverseKGroup(current, k)
+    return pre
+```
+
+### 61. Rotate List
+
+注意k可能大于原本的list长度，所以算长度是必须的，不能直接上来就rotate
+
+```python
+def rotateRight(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+    if not head:
+        return head
+    lastElement = head
+    length = 1
+
+    while lastElement.next:
+        lastElement = lastElement.next
+        length += 1
+
+    k = k % length
+    lastElement.next = head
+    tempNode = head
+    for _ in range( length - k - 1 ):
+        tempNode = tempNode.next
+
+    head = tempNode.next
+    tempNode.next = None
+
+    return head
+```
+
+### 86. Partition List
+
+好聪明！我们知道，快排中之所以用相对不好理解的双指针，就是为了减少空间复杂度，让我们想一下最直接的方法。new 两个数组，一个数组保存小于分区点的数，另一个数组保存大于等于分区点的数，然后把两个数组结合在一起就可以了。
+
+> ```java
+> 1 4 3 2 5 2  x = 3
+> min = {1 2 2}
+> max = {4 3 5}
+> 接在一起
+> ans = {1 2 2 4 3 5}
+> ```
+
+数组由于需要多浪费空间，而没有采取这种思路，但是链表就不一样了呀，它并不需要开辟新的空间，而只改变指针就可以了。
+
+```python
+def partition(self, head: Optional[ListNode], x: int) -> Optional[ListNode]:
+    h1 = l1 = ListNode(0)
+    h2 = l2 = ListNode(0)
+    while head:
+        if head.val < x:
+            l1.next = head
+            l1 = l1.next
+        else:
+            l2.next = head
+            l2 = l2.next
+        head = head.next
+    l2.next = None
+    l1.next = h2.next
+    return h1.next
+```
+
+### 23. Merge k Sorted Lists
+
+#### Solution: Divide and Conquer
+
+```python
+def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        def mergeTwoLists(list1, list2):
+            dummy = p = ListNode()
+            while list1 and list2:
+                if list1.val < list2.val:
+                    p.next = list1
+                    list1 = list1.next
+                else:
+                    p.next = list2
+                    list2 = list2.next
+                p = p.next
+            p.next = list1 or list2
+            return dummy.next
+        
+        if not lists:
+            return None
+        if len(lists) == 1:
+            return lists[0]
+        mid = len(lists) // 2
+        l, r = self.mergeKLists(lists[:mid]), self.mergeKLists(lists[mid:])
+        return mergeTwoLists(l, r)
+```
+
+#### Solution: Heap
+
+相当于同时比较所有lists当前位置的node。
+
+Why we need idx value stored in the heap? If there are duplicate values in the list, we will get "TypeError: '<' not supported between instances of 'ListNode' and 'ListNode'".
+
+```python
+def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]: 
+	q = []
+	for idx, head in enumerate(lists):
+		if head is not None:
+			q.append((head.val, idx, head))
+	heapq.heapify(q)
+	dummy = ListNode()
+	last = dummy
+	while q:
+		val, idx, node = heapq.heappop(q)
+		last.next, last = node, node
+		if node.next is not None:
+			heapq.heappush(q, (node.next.val, idx, node.next))
+	return dummy.next
+```
+
+### 147. Insertion Sort List
+
+基本逻辑就是先切断，然后pre记录insert的位置，pre的下一个就应该是正确的head的位置。时间复杂度O(n^2)
+
+```python
+def insertionSortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode(-5000)
+    pre = dummy
+    while head:
+        node = dummy
+        head_next = head.next
+        head.next = None
+        while node and head.val>node.val:
+            pre = node
+            node = node.next
+        head.next = pre.next
+        pre.next = head
+        head = head_next
+
+    return dummy.next
+```
